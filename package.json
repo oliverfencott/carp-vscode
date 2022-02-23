@@ -3,7 +3,7 @@
   "displayName": "Carp VS Code",
   "description": "Carp syntax highlighting",
   "publisher": "oliverfencott",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/oliverfencott/carp-vscode"
@@ -15,26 +15,32 @@
     "Programming Languages"
   ],
   "contributes": {
-    "languages": [{
-      "id": "carp",
-      "aliases": [
-        "Carp",
-        "carp"
-      ],
-      "extensions": [
-        ".carp"
-      ],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "carp",
-      "scopeName": "source.carp",
-      "path": "./syntaxes/carp.tmLanguage.json"
-    }],
-    "snippets": [{
-      "language": "carp",
-      "path": "./snippets.json"
-    }]
+    "languages": [
+      {
+        "id": "carp",
+        "aliases": [
+          "Carp",
+          "carp"
+        ],
+        "extensions": [
+          ".carp"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "carp",
+        "scopeName": "source.carp",
+        "path": "./syntaxes/carp.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "carp",
+        "path": "./snippets.json"
+      }
+    ]
   },
   "devDependencies": {
     "vsce": "^2.6.7"
