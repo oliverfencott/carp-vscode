@@ -2,6 +2,7 @@
   "name": "carp-vscode",
   "displayName": "carp-vscode",
   "description": "Carp syntax highlighting",
+  "publisher": "oliverfencott",
   "version": "0.0.1",
   "repository": {
     "type": "git",
