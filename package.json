@@ -3,7 +3,7 @@
   "displayName": "carp-vscode",
   "description": "Carp syntax highlighting",
   "publisher": "oliverfencott",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/oliverfencott/carp-vscode"
