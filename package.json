@@ -1,29 +1,37 @@
 {
-    "name": "carp-vscode",
-    "displayName": "carp-vscode",
-    "description": "Carp syntax highlighting",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.64.0"
-    },
-    "categories": [
-        "Programming Languages"
-    ],
-    "contributes": {
-        "languages": [{
-            "id": "carp",
-            "aliases": ["Carp", "carp"],
-            "extensions": [".carp"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "carp",
-            "scopeName": "source.carp",
-            "path": "./syntaxes/carp.tmLanguage.json"
-        }],
-        "snippets": [{
-            "language": "carp",
-            "path": "./snippets.json"
-        }]
-    }
+  "name": "carp-vscode",
+  "displayName": "carp-vscode",
+  "description": "Carp syntax highlighting",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.64.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "carp",
+      "aliases": [
+        "Carp",
+        "carp"
+      ],
+      "extensions": [
+        ".carp"
+      ],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "carp",
+      "scopeName": "source.carp",
+      "path": "./syntaxes/carp.tmLanguage.json"
+    }],
+    "snippets": [{
+      "language": "carp",
+      "path": "./snippets.json"
+    }]
+  },
+  "devDependencies": {
+    "vsce": "^2.6.7"
+  }
 }
