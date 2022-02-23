@@ -40,7 +40,7 @@
     "vsce": "^2.6.7"
   },
   "scripts": {
-    "test": "echo 'Write some tests!' && exit 0",
+    "test": "echo 'Write some tests!'",
     "deploy": "vsce publish --yarn"
   }
 }
