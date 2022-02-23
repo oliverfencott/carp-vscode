@@ -1,0 +1,160 @@
+{
+  ".source.carp": {
+    "use": {
+      "prefix": "use",
+      "body": "(use ${1:module})"
+    },
+    "load": {
+      "prefix": "load",
+      "body": "(load \"${1:carp_file}\")"
+    },
+    "system-include": {
+      "prefix": "sys-inc",
+      "body": "(system-include \"${1:c_header}\")"
+    },
+    "local-include": {
+      "prefix": "loc-inc",
+      "body": "(local-include \"${1:c_header}\")"
+    },
+    "def": {
+      "prefix": "def",
+      "body": "(def ${1:symbol} ${2:value})"
+    },
+    "the": {
+      "prefix": "the",
+      "body": "(the ${1:type} ${2:var})"
+    },
+    "set!": {
+      "prefix": "set!",
+      "body": "(set! ${1:var} ${2:value})"
+    },
+    "let": {
+      "prefix": "let",
+      "body": "(let [${1:bindings}]\n\t${2:body})"
+    },
+    "defn": {
+      "prefix": "defn",
+      "body": "(defn ${1:name}\n\t[${2:params}]\n\t${3:body})"
+    },
+    "fn": {
+      "prefix": "fn",
+      "body": "(fn [${1:params}]\n\t${2:body})$0"
+    },
+    "defmacro": {
+      "prefix": "defmacro",
+      "body": "(defmacro ${1:name}\n\t[${2:params}]\n\t${3:more})"
+    },
+    "deftype": {
+      "prefix": "deftype",
+      "body": "(deftype ${1:name}\n\t[${2:params}]"
+    },
+    "definterface": {
+      "prefix": "definterface",
+      "body": "(definterface ${1:name} (${2:Fn}))"
+    },
+    "defmodule": {
+      "prefix": "defmodule",
+      "body": "(defmodule ${1:name}\n\t${2:def1}\n\t${3:more_defs})"
+    },
+    "if": {
+      "prefix": "if",
+      "body": "(if ${1:bool}\n\t${2:then}\n\t${3:else})"
+    },
+    "if-let": {
+      "prefix": "ifl",
+      "body": "(if-let [${1:bindings}]\n\t${2:then}\n\t${3:else})"
+    },
+    "if-not": {
+      "prefix": "ifn",
+      "body": "(if-not ${1:bool}\n\t${2:then}\n\t${3:else})"
+    },
+    "when": {
+      "prefix": "when",
+      "body": "(when ${1:bool}\n\t${2:body})"
+    },
+    "when-let": {
+      "prefix": "whenl",
+      "body": "(when-let [${1:bindings}]\n\t${2:body})"
+    },
+    "when-not": {
+      "prefix": "whenn",
+      "body": "(when-not ${1:bool}\n\t${2:body})"
+    },
+    "unless": {
+      "prefix": "unless",
+      "body": "(unless ${1:bool}\n\t${2:body})"
+    },
+    "cond": {
+      "prefix": "cond",
+      "body": "(cond\n\t${1:bool} ${2:expr}\n\t$0)"
+    },
+    "case": {
+      "prefix": "case",
+      "body": "(case ${1:dispatch}\n\t${2:bool} ${3:expr}\n\t$0)"
+    },
+    "match": {
+      "prefix": "match",
+      "body": "(match ${1:x}\n\t${2:cases}\n\t$0)"
+    },
+    "filter": {
+      "prefix": "filter",
+      "body": "(filter ${1:bool} ${2:indexed})"
+    },
+    "map": {
+      "prefix": "map",
+      "body": "(map ${1:function} ${2:indexed})"
+    },
+    "endo-filter": {
+      "prefix": "efilter",
+      "body": "(endo-filter ${1:bool} ${2:indexed})"
+    },
+    "endo-map": {
+      "prefix": "emap",
+      "body": "(endo-map ${1:function} ${2:indexed})"
+    },
+    "copy-filter": {
+      "prefix": "cfilter",
+      "body": "(copy-filter ${1:bool} ${2:indexed})"
+    },
+    "copy-map": {
+      "prefix": "cmap",
+      "body": "(copy-map ${1:function} ${2:indexed})"
+    },
+    "reduce": {
+      "prefix": "reduce",
+      "body": "(reduce ${1:function} ${2:init} ${3:indexed})"
+    },
+    "fold": {
+      "prefix": "fold",
+      "body": "(reduce ${1:function} ${2:init} ${3:indexed})"
+    },
+    "while": {
+      "prefix": "while",
+      "body": "(while ${1:bool}\n\t${2:body})"
+    },
+    "each": {
+      "prefix": "each",
+      "body": "(each ${1:bind} ${2:indexed}\n\t${3:body})"
+    },
+    "for": {
+      "prefix": "for",
+      "body": "(for [${1:binding} ${2:start} ${3:end}]\n\t${4:body})"
+    },
+    "seq": {
+      "prefix": "seq",
+      "body": "(seq [${1:head}]\n\t${2:body})"
+    },
+    "length": {
+      "prefix": "len",
+      "body": "(length ${1:data_structure})"
+    },
+    "print": {
+      "prefix": "print",
+      "body": "(print $1)"
+    },
+    "println": {
+      "prefix": "println",
+      "body": "(println $1)"
+    }
+  }
+}

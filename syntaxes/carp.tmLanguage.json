@@ -1,0 +1,272 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "fileTypes": [
+    "carp"
+  ],
+  "foldingStartMarker": "\\(",
+  "foldingStopMarker": "\\)",
+  "keyEquivalent": "^~L",
+  "name": "Carp",
+  "patterns": [{
+    "include": "#all"
+  }],
+  "repository": {
+    "all": {
+      "patterns": [{
+          "include": "#comment"
+        },
+        {
+          "include": "#parens"
+        },
+        {
+          "include": "#brackets"
+        },
+        {
+          "include": "#braces"
+        },
+        {
+          "include": "#reference"
+        },
+        {
+          "include": "#function-reference"
+        },
+        {
+          "include": "#copy"
+        },
+        {
+          "include": "#readermac"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#longstring"
+        },
+        {
+          "include": "#literal"
+        },
+        {
+          "include": "#keyfn"
+        },
+        {
+          "include": "#function"
+        },
+        {
+          "include": "#module"
+        },
+        {
+          "include": "#r-number"
+        },
+        {
+          "include": "#dec-number"
+        },
+        {
+          "include": "#hex-number"
+        },
+        {
+          "include": "#keysym"
+        },
+        {
+          "include": "#function-call"
+        },
+        {
+          "include": "#symbol"
+        }
+      ]
+    },
+    "comment": {
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.comment.carp"
+        }
+      },
+      "match": "(;).*$",
+      "name": "comment.line.carp"
+    },
+    "braces": {
+      "begin": "({)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.braces.end.carp"
+        }
+      },
+      "end": "(})",
+      "patterns": [{
+        "include": "#all"
+      }]
+    },
+    "brackets": {
+      "begin": "(\\[)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.brackets.end.carp"
+        }
+      },
+      "end": "(\\])",
+      "patterns": [{
+        "include": "#all"
+      }]
+    },
+    "parens": {
+      "begin": "(\\()",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.parens.end.carp"
+        }
+      },
+      "end": "(\\))",
+      "patterns": [{
+        "include": "#all"
+      }]
+    },
+    "reference": {
+      "match": "(\\&)",
+      "name": "punctuation.definition.ref.carp",
+      "patterns": [{
+        "include": "#all"
+      }]
+    },
+    "function-reference": {
+      "match": "(\\~)(.+?)(?=\\s)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.func-ref.carp"
+        },
+        "2": {
+          "name": "entity.name.function.call.carp"
+        }
+      },
+      "patterns": [{
+        "include": "#all"
+      }]
+    },
+    "copy": {
+      "match": "(\\@)",
+      "name": "punctuation.definition.copy.carp",
+      "patterns": [{
+        "include": "#all"
+      }]
+    },
+    "readermac": {
+      "match": "[\\'\\;\\,]",
+      "name": "punctuation.other.carp"
+    },
+    "keyfn": {
+      "patterns": [{
+          "match": "(?<=(\\s|\\(|\\[|\\{))(doc)(?=(\\s|\\)|\\]|\\}))",
+          "name": "keyword.control.doc.carp"
+        },
+        {
+          "match": "(?<=(\\s|\\(|\\[|\\{))((break|def[a-z\\-]*)|fn|quote|quasiquote|unquote|the|use|system\\-include|local\\-include|match)(?=(\\s|\\)|\\]|\\}))",
+          "name": "keyword.control.carp"
+        },
+        {
+          "match": "(?<=(\\s|\\(|\\[|\\{))(address|case|cond|do|set!|while|while\\-do|for|each|if|if\\-let|if\\-not|let|let\\-do|when|when\\-let|when\\-not|unless|seq|register[a-z\\-]*|ref|copy)(?=(\\s|\\)|\\]|\\}))",
+          "name": "storage.control.carp"
+        },
+        {
+          "match": "(?<=(\\s|\\())(%|\\*|\\+|\\-|/|/=|<|<=|=|==|>|>=|inc|dec)(?=(\\s|\\)))",
+          "name": "keyword.operator.carp"
+        }
+      ]
+    },
+    "literal": {
+      "match": "(?<![\\.:\\w_\\-=!@\\$%^&?|\\\\/<>*])(true|false)(?![\\.:\\w_\\-=!@\\$%^&?|\\\\/<>*])",
+      "name": "constant.literal.carp"
+    },
+    "module": {
+      "patterns": [{
+          "match": "(?<=(use\\s))([A-Za-z0-9\\-]*?)(?=(\\s|\\)))",
+          "name": "entity.name.module.carp"
+        },
+        {
+          "match": "(?<=(defmodule\\s))([A-Za-z0-9\\-]*)(?=(\\s|\\)))",
+          "name": "entity.name.module.carp"
+        }
+      ]
+    },
+    "function-call": {
+      "match": "(?<=\\()(.+?)(?=\\s|\\))",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.call.carp"
+        }
+      }
+    },
+    "function": {
+      "begin": "(?<=[\\(defn|\\(fn])(?<![\\(def])\\s([a-zA-Z0-9\\#\\.\\-\\_\\+\\=\\>\\<\\/\\!\\?\\*]+)(?=\\s|[\\s\\[])",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.def.carp"
+        }
+      },
+      "end": "(?=\\s|\\(|\\[|\\)|\\])",
+      "patterns": [{
+        "include": "#all"
+      }]
+    },
+    "keysym": {
+      "match": "(?<![\\.:\\w_\\-=!@\\$%^&?|\\\\/<>*]):[\\.:\\w_\\-=!@\\$%^&?|\\\\/<>*]*",
+      "name": "constant.keyword.carp"
+    },
+    "symbol": {
+      "match": "(?<![\\.:\\w_\\-=!@\\$%^&?|\\\\/<>*])[\\.a-zA-Z_\\-=!@\\$%^&?|\\\\/<>*][\\.:\\w_\\-=!@\\$%^&?|\\\\/<>*]*",
+      "name": "entity.name.symbol.carp"
+    },
+    "hex-number": {
+      "match": "(?<![\\.:\\w_\\-=!\\$%^?|\\\\/<>*])[-+]?0x([_\\da-fA-F]+|[_\\da-fA-F]+\\.[_\\da-fA-F]*|\\.[_\\da-fA-F]+)(&[+-]?[\\da-fA-F]+)?(?![\\.:\\w_\\-=!\\$%^?|\\\\/<>*])",
+      "name": "constant.numeric.hex.carp"
+    },
+    "dec-number": {
+      "match": "(?<![\\.:\\w_\\-=!\\$%^?|\\\\/<>*])[-+]?([_\\d]+|[_\\d]+\\.[_\\d]*|\\.[_\\d]+)([eE&][+-]?[\\d]+)?(?![\\.:\\w_\\-=!\\$%^?|\\\\/<>*])",
+      "name": "constant.numeric.decimal.carp"
+    },
+    "r-number": {
+      "match": "(?<![\\.:\\w_\\-=!\\$%^?|\\\\/<>*])[-+]?\\d\\d?r([_\\w]+|[_\\w]+\\.[_\\w]*|\\.[_\\w]+)(&[+-]?[\\w]+)?(?![\\.:\\w_\\-=!\\$%^?|\\\\/<>*])",
+      "name": "constant.numeric.decimal.carp"
+    },
+    "string": {
+      "begin": "(\")",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.begin.carp"
+        }
+      },
+      "end": "(\")",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.end.carp"
+        }
+      },
+      "name": "string.quoted.double.carp",
+      "patterns": [{
+        "match": "(\\\\[nevr0zft\"\\\\']|\\\\x[0-9a-fA-F][0-9a-fA-f])",
+        "name": "constant.character.escape.carp"
+      }]
+    },
+    "longstring": {
+      "begin": "(`+)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.begin.carp"
+        },
+        "2": {
+          "name": "punctuation.definition.string.begin.carp"
+        }
+      },
+      "end": "\\2",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.end.carp"
+        }
+      },
+      "name": "string.quoted.triple.carp"
+    },
+    "nomatch": {
+      "match": "\\S+",
+      "name": "invalid.illegal.carp"
+    }
+  },
+  "scopeName": "source.carp",
+  "uuid": "3743190f-20c4-44d0-8640-6611a983296b"
+}

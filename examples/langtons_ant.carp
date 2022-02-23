@@ -1,0 +1,128 @@
+(use Int)
+(use Double)
+(use Array)
+
+(load "SDL.carp")
+(load "SDL_image.carp")
+
+(Debug.sanitize-addresses)
+
+(Project.config "title" "Ant")
+
+(deftype State
+    [width Int
+     height Int
+     grid (Array Bool)
+     x Int
+     y Int
+     dir Int
+     stopped Bool])
+
+(defn coord-to-index [state x y]
+  (+ (* y @(State.width state)) x))
+
+(defn get-square [state x y]
+  @(unsafe-nth (State.grid state) (coord-to-index state x y)))
+
+(defn draw [rend state]
+  (do
+    (SDL.set-render-draw-blend-mode rend SDL.blend-mode-add)
+    (SDL.set-render-draw-color rend 0 0 0 0)
+    (SDL.render-clear rend)
+    (for [y 0 @(State.height state)]
+      (for [x 0 @(State.width state)]
+        (let [w (/ 800 @(State.width state))
+              h (/ 600 @(State.height state))]
+          (do
+            (cond
+              (and (= x @(State.x state)) (= y @(State.y state))) (SDL.set-render-draw-color rend 255 0 0 255)
+              (get-square state x y) (SDL.set-render-draw-color rend 0 0 0 255)
+              (SDL.set-render-draw-color rend 255 255 255 255))
+            (SDL.render-fill-rect rend (Pointer.address &(SDL.rect (* x w) (* y h) (dec w) (dec h))))))))
+    (SDL.render-present rend)
+    ))
+
+(defn handle-events [app rend]
+  (let [event (SDL.Event.init)]
+    (while (SDL.Event.poll (Pointer.address &event))
+      (let [et (SDL.Event.type &event)]
+        (cond (= et SDL.Event.quit) (SDLApp.stop app)
+              ())))))
+
+(defn flip-at-ant [state]
+  (let [x @(State.x &state)
+        y @(State.y &state)
+        n (coord-to-index &state x y)
+        b (unsafe-nth (State.grid &state) n)]
+    (do (aset! (State.grid &state) n (not @b))
+        state)))
+
+(defn turn-left [dir]
+  (if (= dir 3) 0 (inc dir)))
+
+(defn turn-right [dir]
+  (if (= dir 0) 3 (dec dir)))
+
+(defn move-ant [state]
+  (let [x @(State.x &state)
+        y @(State.y &state)
+        n (coord-to-index &state x y)
+        b (unsafe-nth (State.grid &state) n)
+        dir @(State.dir &state)
+        new-dir (if @b (turn-left dir) (turn-right dir))
+        new-x (case new-dir
+                0 (inc x)
+                2 (dec x)
+                x)
+        new-y (case new-dir
+                1 (inc y)
+                3 (dec y)
+                y)]
+    (if (or (< new-x 0)
+             (< new-y 0)
+             (>= new-x @(State.width &state))
+             (>= new-y @(State.height &state)))
+      (State.set-stopped state true)
+      (=> state
+          (State.set-x new-x)
+          (State.set-y new-y)
+          (State.set-dir new-dir)))))
+
+(defn tick [state]
+  (=> state
+      (move-ant)
+      (flip-at-ant)))
+
+(defn create-state []
+  (let [w 80
+        h 60
+        b false
+        arr (Array.replicate (* w h) &b)]
+    (State.init w h arr (/ w 2) (/ h 2) 0 false)))
+
+(defn-do main []
+  (Debug.log-memory-balance! true)
+  (let-do [app (SDLApp.create "Langton's Ant" 800 600)
+           rend @(SDLApp.renderer &app)
+           state (create-state)]
+    (while (not @(State.stopped &state))
+      (do
+        (handle-events &app rend)
+        (draw rend &state)
+        (set! state (tick state))
+        (SDL.delay 1))))
+  0)
+
+;; Just the model
+;; (defn main []
+;;   (do
+;;     (Debug.reset-memory-balance!)
+;;     (let [state (create-state)]
+;;       (for [i 0 10000]
+;;         (do
+;;           (set! state (tick state))
+;;           (IO.println &(str (State.dir &state)))
+;;           (IO.println &(str (Debug.memory-balance)))
+;;           (System.sleep-micros 1000)
+;;           )))
+;;     (IO.println &(str (Debug.memory-balance)))))

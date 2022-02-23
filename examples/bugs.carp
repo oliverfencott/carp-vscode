@@ -1,0 +1,175 @@
+;; This file contains examples of unsolved bugs
+
+(Debug.sanitize-addresses)
+(Project.config "print-ast" true)
+
+;; This shouldn't compile:
+;; (defn faulty-repeat [n inpt]
+;;     (let [str ""]
+;;       (do
+;;         (for [i 0 n]
+;;           (set! str &(append @str @inpt)))
+;;         @str)))
+;; (defn main []
+;;   (let [strings (faulty-repeat 20 "x")]
+;;     (IO.println &strings)))
+
+;; ;; Dangling reference to member variable.
+;; (deftype S [f String])
+;; (defn main []
+;;   (let [s (S.init @"hello")
+;;         r (S.f &s)
+;;         _ (S.set-f s @"bye")]
+;;     (IO.println r)))
+
+;; ;; Dangling reference to variable.
+;; (defn main []
+;;   (let [s @"hello"
+;;         r &s]
+;;     (do (String.delete s)
+;;         (IO.println r))))
+
+;; ;; This crashes the compiler:
+;; (defn x [a] (the Inthdfdf a))
+
+;; ;; The error message for this is really bad:
+;; (defn f []
+;;   (let [s @"hej"]
+;;     (do (delete s)
+;;         s)))
+
+;; Setting ref to value in short-lived scope
+;; (defn main []
+;;   (let-do [r &[1 2 3]]
+;;     (let [xs [4 5 6]]
+;;       (set! r &xs))
+;;     (println* r)))
+
+;; Weird problem with memory management inside 'and':
+;; (deftype Blah [])
+
+;; (defmodule Blah
+;;   (defn = [a b]
+;;     true))
+
+;; (defn bug []
+;;   (and (= &(Blah.init) &(Blah.init))
+;;        (= &(Blah.init) &(Blah.init))))
+
+;; (defn main []
+;;   (assert (bug)))
+
+;; Closures do not generate type definitions, issue #299
+;; (defmodule Example
+;;   (defn parallel [resistances]
+;;     (Array.reduce (fn [x y] (+ x (/ 1.0 @y))) 0.0 resistances))
+;;   )
+
+;; (deftype Hi [])
+
+;; (defmodule Hi
+
+;;   (def GLOBALHI (Hi.init))
+
+;;   (defn set-hi [h]
+;;     (set! GLOBALHI h)))
+
+;; (defn main []
+;;   (let [f (fn [x]
+;;             (let [xx x]
+;;               (fn [y]
+;;                 (fn [z]
+;;                   (+ xx (+ y z))))))]
+;;     (println* (((f 4) 40) 400))))
+
+;; (defn mainold []
+;;   (let [f (fn [x]
+;;             ((fn [y] (+ x y)) 10))]
+;;     (IO.println &(str (f 20)))))
+
+;; (defn call-with-1 [f]
+;;   (~f 1))
+
+;; (defn call-me [f]
+;;   (Int.+ 2 (f 1)))
+
+;; (defn wrapper1 [f]
+;;   (fn [x] (f x)))
+
+;; (defn wrapper2 [f]
+;;   (fn [x] (~f x)))
+
+;; (defn main []
+;;   (Int.+
+;;    ((wrapper1 Int.inc) 3)
+;;    ((wrapper2 &Int.inc) 3)))
+
+;; (defn foo [f]
+;;   (let [g f]
+;;     (fn [] (Int.+ (g 1) 12345))))
+
+;; (defmodule T)
+;; (defmacro test [x] x)
+;; (test T) ; => T
+;; (test T) ; => T
+
+;; (defmacro test1 [adrd] adrd)
+;; ;;(test1 T) ; fails, symbol not found
+;; (expand '(test1 T)) ; => T
+;; (defmodule T)
+;; (test1 T) ; => T
+;; (expand '(test1 T)) ; => hangs
+
+
+
+;; Not sure what these tests are about? (lifetimes probably)
+;; (defn main []
+;;   (let [ret false
+;;         f (fn []
+;;             (set! ret true))]
+;;     (do
+;;       (f)
+;;       (IO.println &(str ret)))))
+
+;; (defn main []
+;;   (let [ret false
+;;         f (fn []
+;;             (let [x 10]
+;;               (set! x 11)))]
+;;     (do
+;;       (f)
+;;       (IO.println &(str ret)))))
+
+;; (defn main2 []
+;;   (let [x 10]
+;;     (do
+;;       (set! x 11)
+;;       (println* x))))
+
+
+
+
+
+
+;; The ref error is detected when the forms inside (= ...) are reversed.
+;; Right now the lifetime (that is shared by both arguments to =) becomes
+;; set to [111], which is alive for the rest of the scope.
+;; So the memory error inside (let ...) doesn't get detected since the
+;; lifetime is alive before, during, and after its scope.
+;; (defn f []
+;;   (=
+;;      &[111]
+;;      (let [xs &[222]]
+;;        xs)
+
+;;      ))
+
+
+
+;; Bug! (issue https://github.com/carp-lang/Carp/issues/570)
+(defn returning-refs-from-match []
+  (println*
+   (match (Maybe.Just 1)
+     (Maybe.Just _) &@"hej"))
+  )
+
