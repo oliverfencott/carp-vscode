@@ -31,5 +31,8 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Print failed test
-        if: success() == false && matrix.os == 'ubuntu-latest'
+        if: success() == false
         run: "echo 'Tests failed'"
+      - name: Print succeeded test
+        if: success() == true
+        run: "echo 'Tests succeeded'"
