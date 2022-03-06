@@ -1,0 +1,5 @@
+(defmodule Foo
+  (def bar 1)
+  (doc hellof "The docs for hello are here and different")
+  (defn hello[x] (the String x)))
+
