@@ -3,7 +3,7 @@
     "files.exclude": {
         "out": false,
         "**/node_modules": true,
-        "**/out": true,
+        "**/dist": true,
         "**/*.vsix": true
     },
     "search.exclude": {

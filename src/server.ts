@@ -44,6 +44,7 @@ connection.onInitialize((params: InitializeParams) => {
 
   const result: InitializeResult = {
     capabilities: {
+      hoverProvider: true,
       textDocumentSync: TextDocumentSyncKind.Incremental,
       // Tell the client that this server supports code completion.
       completionProvider: {
@@ -130,6 +131,26 @@ documents.onDidChangeContent(change => {
   validateTextDocument(change.document);
 });
 
+connection.onHover((document, _position, token, e) => {
+  const { position } = document;
+
+  return {
+    contents: [
+      {
+        value: [
+          '```',
+          `Hello, from HoverProvider but on the server!`,
+          `__Line__: ${position.line}`,
+          `__Char__: ${position.character}`,
+          '```'
+        ].join('\n'),
+        language: 'carp',
+        isTrusted: true
+      }
+    ]
+  };
+});
+
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   // In this simple example we get the settings for every validate run.
   let settings = await getDocumentSettings(textDocument.uri);
@@ -143,6 +164,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   let diagnostics: Diagnostic[] = [];
   while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
     problems++;
+
     let diagnostic: Diagnostic = {
       severity: DiagnosticSeverity.Warning,
       range: {
@@ -150,7 +172,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
         end: textDocument.positionAt(m.index + m[0].length)
       },
       message: `${m[0]} is all uppercase.`,
-      source: 'ex'
+      source: 'CarpLSP'
     };
     if (hasDiagnosticRelatedInformationCapability) {
       diagnostic.relatedInformation = [
@@ -176,6 +198,40 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   // Send the computed diagnostics to VS Code.
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
+
+documents.onDidSave(change => {
+  // connection.console.log(JSON.stringify(change.document, null, 2));
+  const textToFind = '(use IO)';
+  const charLoc = change.document.getText().indexOf(textToFind);
+
+  // const p = new ProgressType('');
+
+  // connection.sendProgress(ProgressType)
+
+  connection.console.log(charLoc.toString());
+
+  connection.sendDiagnostics({
+    uri: change.document.uri,
+    diagnostics: [
+      {
+        severity: DiagnosticSeverity.Information,
+        message: 'hello',
+        range: {
+          start: {
+            line: 0,
+            character: 0
+          },
+          end: {
+            line: 0,
+            character: 10
+          }
+        }
+      }
+    ]
+  });
+
+  return Promise.resolve();
+});
 
 connection.onDidChangeWatchedFiles(_change => {
   // Monitored files have change in VS Code

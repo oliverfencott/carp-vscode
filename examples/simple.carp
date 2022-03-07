@@ -1,0 +1,14 @@
+(load "examples/simple-1.carp")
+
+(defmodule Simple    
+  (doc identity "Takes a string and returns a string")
+  (defn identity [str]
+    (the String str))
+
+  (doc hello "ITS CHANGED.")
+  (def hello Simple1.hello)
+  ;; (def hello "world")
+
+  (defmodule Two
+    (def two-world 1))
+  )

@@ -5,7 +5,7 @@
   "publisher": "oliverfencott",
   "version": "0.1.4",
   "icon": "icon.png",
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:carp"
   ],
@@ -21,37 +21,28 @@
   ],
   "contributes": {
     "commands": [
-      {
-        "command": "carp-vscode.helloWorld",
-        "title": "Say Hello"
-      }
+
     ],
-    "languages": [
-      {
-        "id": "carp",
-        "aliases": [
-          "Carp",
-          "carp"
-        ],
-        "extensions": [
-          ".carp"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "carp",
-        "scopeName": "source.carp",
-        "path": "./syntaxes/carp.tmLanguage.json"
-      }
-    ],
-    "snippets": [
-      {
-        "language": "carp",
-        "path": "./snippets.json"
-      }
-    ]
+    "languages": [{
+      "id": "carp",
+      "aliases": [
+        "Carp",
+        "carp"
+      ],
+      "extensions": [
+        ".carp"
+      ],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "carp",
+      "scopeName": "source.carp",
+      "path": "./syntaxes/carp.tmLanguage.json"
+    }],
+    "snippets": [{
+      "language": "carp",
+      "path": "./snippets.json"
+    }]
   },
   "devDependencies": {
     "@types/node": "^17.0.19",
@@ -61,6 +52,7 @@
     "vscode": "^1.1.37",
     "vscode-languageclient": "^7.0.0",
     "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-protocol": "^3.16.0",
     "vscode-languageserver-textdocument": "^1.0.4"
   },
   "scripts": {

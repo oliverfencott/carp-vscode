@@ -12,27 +12,40 @@ import {
 
 let client: LanguageClient;
 
+// class HoverProvider implements vscode.HoverProvider {
+//   provideHover(
+//     document: vscode.TextDocument,
+//     position: vscode.Position,
+//     token: vscode.CancellationToken
+//   ): vscode.ProviderResult<vscode.Hover> {
+//     return {
+//       contents: [
+//         {
+//           value: [
+//             `Hello, from CodeLens!`,
+//             `__Line__: ${position.line}`,
+//             `__Char__: ${position.character}`
+//           ].join('\n'),
+//           language: 'carp',
+//           isTrusted: true
+//         }
+//       ]
+//     };
+//   }
+// }
+
 export function activate(context: ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "carp-vscode" is now active!');
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand(
-    'carp-vscode.helloWorld',
-    () => {
-      // The code you place here will be executed every time your command is executed
-      // Display a message box to the user
-      vscode.window.showInformationMessage('Hello World from carp-vscode!');
-    }
-  );
-
-  context.subscriptions.push(disposable);
+  // const hoverProvider = vscode.languages.registerHoverProvider(
+  //   'carp',
+  //   new CarpHoverProvider()
+  // );
 
   // The server is implemented in node
-  let serverModule = context.asAbsolutePath(path.join('out', 'server.js'));
+  let serverModule = context.asAbsolutePath(path.join('dist', 'server.js'));
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
   let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
@@ -52,6 +65,7 @@ export function activate(context: ExtensionContext) {
   let clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
     documentSelector: [{ scheme: 'file', language: 'carp' }],
+    outputChannelName: 'CarpLSP',
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
@@ -66,7 +80,12 @@ export function activate(context: ExtensionContext) {
     clientOptions
   );
 
+  vscode;
+
+  // vscode.languages.register
+
   // Start the client. This will also launch the server
+  // context.subscriptions.push(client.start(), hoverProvider);
   context.subscriptions.push(client.start());
 }
 
