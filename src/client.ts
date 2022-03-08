@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as path from 'path';
-import * as vscode from 'vscode';
 import { ExtensionContext, workspace } from 'vscode';
 import {
   LanguageClient,
@@ -79,10 +78,6 @@ export function activate(context: ExtensionContext) {
     serverOptions,
     clientOptions
   );
-
-  vscode;
-
-  // vscode.languages.register
 
   // Start the client. This will also launch the server
   // context.subscriptions.push(client.start(), hoverProvider);

@@ -8,11 +8,11 @@ type execOpts = {
   splitter: string;
 };
 
-const safeParse = (s: string) => {
+const safeParse = <T>(s: string): T | undefined => {
   try {
-    return JSON.parse(s);
+    return JSON.parse(s) as T;
   } catch (_) {
-    return {};
+    return undefined;
   }
 };
 
@@ -22,7 +22,8 @@ const DEV_COMMAND = (opts: execOpts) =>
     `(do ` +
       `(load \\"${opts.filePath}\\") ` +
       `(macro-log \\"${opts.splitter}\\") ` +
-      `(build-info ['Array] []) ` +
+      // `(build-info ['Array] [\\"${opts.filePath}\\"]) ` +
+      `(build-info) ` +
       `(quit)` +
     `) \\"${opts.filePath}\\"`+
   `"`;
@@ -31,7 +32,38 @@ const PROD_COMMAND = (opts: execOpts) =>
   // `carp --eval-postload '(do (load "filename") (build-info ['Array] []) (quit))'`;
   ``;
 
+type jsonMap = { [key: string]: json };
+type jsonList = json[];
+type json = string | number | boolean | null | jsonList | jsonMap;
+
+export type Bindings = {
+  bindings: CarpBinding[];
+  builtIns: {
+    [key: string]: CarpBinding;
+  };
+};
+
+export type CarpBinding = {
+  type: null | string;
+  info: null | {
+    line: number;
+    column: number;
+    file: string;
+  };
+  isBuiltIn: boolean;
+  symbol: string;
+  meta: jsonMap;
+};
+
+export type CarpResponse = CarpBinding[];
+
+let _currentState: undefined | Bindings;
+
 export class Carp {
+  static getState() {
+    return _currentState;
+  }
+
   static exec({ filePath }: { filePath: string }) {
     filePath = filePath.replace('file://', '');
 
@@ -53,9 +85,22 @@ export class Carp {
       : { command: PROD_COMMAND(options), cwd: '.' };
 
     const stdout = execSync(command, { cwd });
-    const [_, output] = stdout.toString().split(options.splitter);
+    const [message, output] = stdout.toString().split(options.splitter);
 
-    return safeParse(output);
+    console.log('message:', message);
+    console.log('response:', output);
+
+    const response = safeParse<CarpResponse>(output);
+    if (response) {
+      _currentState = {
+        bindings: response,
+        builtIns: Object.fromEntries(
+          response.filter(x => x.isBuiltIn).map(x => [x.symbol, x])
+        )
+      };
+    }
+
+    return Carp.getState();
   }
 }
 

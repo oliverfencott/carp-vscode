@@ -51,6 +51,9 @@ connection.onInitialize((params: InitializeParams) => {
       hoverProvider: true,
       textDocumentSync: TextDocumentSyncKind.Incremental,
       // Tell the client that this server supports code completion.
+      codeLensProvider: {
+        resolveProvider: true
+      },
       completionProvider: {
         resolveProvider: true
       }
@@ -136,8 +139,72 @@ documents.onDidChangeContent(change => {
   validateTextDocument(change.document);
 });
 
-connection.onHover((document, _position, token, e) => {
+connection.onCodeLens(action => {
+  const state = Carp.getState();
+
+  if (state) {
+    return state.bindings.flatMap(binding => {
+      if (
+        !binding.info ||
+        !binding.type ||
+        'file://' + binding.info.file != action.textDocument.uri
+      ) {
+        return [];
+      }
+
+      return [
+        {
+          command: {
+            command: 'my-comm',
+            title: binding.type
+          },
+          range: {
+            start: {
+              character: binding.info.column,
+              line: binding.info.line - 1
+            },
+            end: {
+              character: binding.info.column + binding.symbol.length,
+              line: binding.info.line - 1
+            }
+          }
+        }
+      ];
+    });
+  }
+});
+
+// connection.onCodeLensResolve(action => {
+//   return action;
+// });
+
+connection.onHover((document, _token, _progressReporter, e) => {
   const { position } = document;
+  const uri = document.textDocument.uri.replace('file://', '');
+  document.textDocument.uri;
+
+  const state = Carp.getState();
+
+  if (!state || !Array.isArray(state.bindings)) {
+    return;
+  }
+
+  const current = state.bindings.find(x => {
+    return x.isBuiltIn;
+  });
+
+  if (current) {
+    const docString = current.meta['doc'];
+    return {
+      contents: [
+        {
+          value: typeof docString == 'string' ? docString : 'Here is some info',
+          isTrusted: true,
+          language: 'carp'
+        }
+      ]
+    };
+  }
 
   return {
     contents: [
@@ -205,42 +272,51 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 }
 
 documents.onDidSave(change => {
-  const stdout = Carp.exec({
+  const response = Carp.exec({
     filePath: change.document.uri
   });
 
   if (IS_DEV) {
-    writeFile(
-      path.join('../carp-vscode/__TEST-OUTPUT__.json'),
-      JSON.stringify(stdout, null, 2)
-    )
-      .then(() => {
-        console.log('Wrote file');
-      })
-      .catch(() => {
-        console.log('Error writing file');
-      });
+    console.log('Is dev');
+    if (response) {
+      console.log('About to write file');
+      writeFile(
+        path.join('../carp-vscode/__TEST-OUTPUT__.json'),
+        JSON.stringify(response, null, 2)
+      )
+        .then(() => {
+          console.log('Wrote file');
+        })
+        .catch(e => {
+          console.log(e);
+          console.log('Error writing file');
+        });
+    } else {
+      console.log("Didn't get a response from server");
+    }
+  } else {
+    console.log("Somehow isn't dev");
   }
 
-  connection.sendDiagnostics({
-    uri: change.document.uri,
-    diagnostics: [
-      {
-        severity: DiagnosticSeverity.Information,
-        message: 'hello',
-        range: {
-          start: {
-            line: 0,
-            character: 0
-          },
-          end: {
-            line: 0,
-            character: 10
-          }
-        }
-      }
-    ]
-  });
+  // connection.sendDiagnostics({
+  //   uri: change.document.uri,
+  //   diagnostics: [
+  //     {
+  //       severity: DiagnosticSeverity.Information,
+  //       message: 'hello',
+  //       range: {
+  //         start: {
+  //           line: 0,
+  //           character: 0
+  //         },
+  //         end: {
+  //           line: 0,
+  //           character: 10
+  //         }
+  //       }
+  //     }
+  //   ]
+  // });
 
   return Promise.resolve();
 });
