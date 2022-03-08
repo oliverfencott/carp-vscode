@@ -1,3 +1,4 @@
+import { writeFile } from 'fs/promises';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
   CompletionItem,
@@ -13,6 +14,9 @@ import {
   TextDocuments,
   TextDocumentSyncKind
 } from 'vscode-languageserver/node';
+import Carp from './carp';
+import { IS_DEV } from './env';
+import path = require('path');
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -70,6 +74,7 @@ connection.onInitialized(() => {
       undefined
     );
   }
+
   if (hasWorkspaceFolderCapability) {
     connection.workspace.onDidChangeWorkspaceFolders(_event => {
       connection.console.log('Workspace folder change event received.');
@@ -200,15 +205,22 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 }
 
 documents.onDidSave(change => {
-  // connection.console.log(JSON.stringify(change.document, null, 2));
-  const textToFind = '(use IO)';
-  const charLoc = change.document.getText().indexOf(textToFind);
+  const stdout = Carp.exec({
+    filePath: change.document.uri
+  });
 
-  // const p = new ProgressType('');
-
-  // connection.sendProgress(ProgressType)
-
-  connection.console.log(charLoc.toString());
+  if (IS_DEV) {
+    writeFile(
+      path.join('../carp-vscode/__TEST-OUTPUT__.json'),
+      JSON.stringify(stdout, null, 2)
+    )
+      .then(() => {
+        console.log('Wrote file');
+      })
+      .catch(() => {
+        console.log('Error writing file');
+      });
+  }
 
   connection.sendDiagnostics({
     uri: change.document.uri,

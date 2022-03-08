@@ -1,0 +1,2 @@
+(macro-log "logging a number")
+(def hello 1)

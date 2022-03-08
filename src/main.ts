@@ -36,46 +36,98 @@
 import { spawn } from 'child_process';
 import { writeFileSync } from 'fs';
 
-const EXECUTABLE_NAME = 'carp';
-interface SpawnError {
-  errno?: -2;
-  code?: 'ENOENT';
-  path?: string;
+function runInterpreter() {
+  const EXECUTABLE_NAME = 'carp';
+  interface SpawnError {
+    errno?: -2;
+    code?: 'ENOENT';
+    path?: string;
+  }
+
+  const decolorize = (str: string) => str.replace(/\x1B\[\d+m/gi, '');
+
+  const PROMPT = '--PROMPT--';
+  const STARTUP_ARGS = [
+    `--eval-preload`,
+    `(Project.config "prompt" "${PROMPT}")`
+  ];
+
+  const program = spawn(EXECUTABLE_NAME, STARTUP_ARGS);
+
+  program.on('error', (e?: SpawnError) => {
+    if (e && e.code && e.code == 'ENOENT' && e.path == EXECUTABLE_NAME) {
+      console.log(`Couldn't find "${EXECUTABLE_NAME}" in path`);
+    }
+  });
+
+  function send(command: string) {
+    program.stdin.write(command + '\n');
+  }
+
+  let text = '';
+  const texts: string[] = [];
+
+  program.stdout.on('data', (data: Buffer) => {
+    text += decolorize(data.toString());
+
+    if (text.endsWith(PROMPT)) {
+      // console.log('Latest text:', text);
+      writeFileSync('output.txt', text);
+      texts.push(text);
+      text = '';
+    }
+  });
+
+  send(':e');
+  send(':q');
 }
 
-const decolorize = (str: string) => str.replace(/\x1B\[\d+m/gi, '');
-
-const PROMPT = '--PROMPT--';
-const STARTUP_ARGS = [
-  `--eval-preload`,
-  `(Project.config "prompt" "${PROMPT}")`
-];
-
-const program = spawn(EXECUTABLE_NAME, STARTUP_ARGS);
-
-program.on('error', (e?: SpawnError) => {
-  if (e && e.code && e.code == 'ENOENT' && e.path == EXECUTABLE_NAME) {
-    console.log(`Couldn't find "${EXECUTABLE_NAME}" in path`);
+function runCheck() {
+  const EXECUTABLE_NAME = 'carp';
+  interface SpawnError {
+    errno?: -2;
+    code?: 'ENOENT';
+    path?: string;
   }
-});
 
-function send(command: string) {
-  program.stdin.write(command + '\n');
+  const decolorize = (str: string) => str.replace(/\x1B\[\d+m/gi, '');
+
+  const STARTUP_ARGS = [`test.carp`, `--check`];
+
+  const program = spawn(EXECUTABLE_NAME, STARTUP_ARGS);
+
+  program.on('error', (e?: SpawnError) => {
+    if (e && e.code && e.code == 'ENOENT' && e.path == EXECUTABLE_NAME) {
+      console.log(`Couldn't find "${EXECUTABLE_NAME}" in path`);
+    }
+  });
+
+  let text = '';
+  const texts: string[] = [];
+
+  program.stderr.on('data', (data: Buffer) => {
+    text += decolorize(data.toString());
+  });
+
+  program.stdout.on('data', (data: Buffer) => {
+    text += decolorize(data.toString());
+
+    // if (text.endsWith(PROMPT)) {
+    //   // console.log('Latest text:', text);
+    //   writeFileSync('output.txt', text);
+    //   texts.push(text);
+    //   text = '';
+    // }
+  });
+
+  program.on('exit', () => {
+    console.log(text);
+
+    console.log('exited program');
+  });
+
+  // send(':e');
+  // send(':q');
 }
 
-let text = '';
-const texts: string[] = [];
-
-program.stdout.on('data', (data: Buffer) => {
-  text += decolorize(data.toString());
-
-  if (text.endsWith(PROMPT)) {
-    // console.log('Latest text:', text);
-    writeFileSync('output.txt', text);
-    texts.push(text);
-    text = '';
-  }
-});
-
-send(':e');
-send(':q');
+runCheck();
