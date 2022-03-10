@@ -688,30 +688,12 @@
     {
       "type": "Module",
       "info": {
-        "line": 10,
-        "column": 12,
-        "file": "/Users/oliverfencott/.carp/core/SDL_image.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "IMG",
-      "meta": {}
-    },
-    {
-      "type": "Module",
-      "info": {
         "line": 5,
         "column": 12,
         "file": "/Users/oliverfencott/.carp/core/IO.carp"
       },
       "isBuiltIn": false,
       "symbol": "IO",
-      "meta": {}
-    },
-    {
-      "type": "Module",
-      "info": null,
-      "isBuiltIn": false,
-      "symbol": "Images",
       "meta": {}
     },
     {
@@ -1018,75 +1000,6 @@
     },
     {
       "type": "Module",
-      "info": {
-        "line": 42,
-        "column": 12,
-        "file": "/Users/oliverfencott/.carp/core/SDL.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "SDL",
-      "meta": {}
-    },
-    {
-      "type": "Module",
-      "info": null,
-      "isBuiltIn": false,
-      "symbol": "SDLApp",
-      "meta": {}
-    },
-    {
-      "type": "(Fn [(Ref SDLApp__Lambda_reduce_MINUS_events__SDLApp_MUL__int_19_env_ty a)] SDLApp__Lambda_reduce_MINUS_events__SDLApp_MUL__int_19_env_ty)",
-      "info": {
-        "line": -1,
-        "column": -1,
-        "file": "SDLApp__Lambda_reduce_MINUS_events__SDLApp_MUL__int_19_env_ty_copy template"
-      },
-      "isBuiltIn": false,
-      "symbol": "SDLApp__Lambda_reduce_MINUS_events__SDLApp_MUL__int_19_env_ty_copy",
-      "meta": {
-        "hidden": "true"
-      }
-    },
-    {
-      "type": "(Fn [(Ptr SDLApp__Lambda_reduce_MINUS_events__SDLApp_MUL__int_19_env_ty)] ())",
-      "info": {
-        "line": -1,
-        "column": -1,
-        "file": "SDLApp__Lambda_reduce_MINUS_events__SDLApp_MUL__int_19_env_ty_delete template"
-      },
-      "isBuiltIn": false,
-      "symbol": "SDLApp__Lambda_reduce_MINUS_events__SDLApp_MUL__int_19_env_ty_delete",
-      "meta": {
-        "hidden": "true"
-      }
-    },
-    {
-      "type": "Module",
-      "info": {
-        "line": 36,
-        "column": 12,
-        "file": "/Users/oliverfencott/.carp/core/SDL.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "SDL_Color",
-      "meta": {}
-    },
-    {
-      "type": "Module",
-      "info": null,
-      "isBuiltIn": false,
-      "symbol": "SDL_Point",
-      "meta": {}
-    },
-    {
-      "type": "Module",
-      "info": null,
-      "isBuiltIn": false,
-      "symbol": "SDL_Rect",
-      "meta": {}
-    },
-    {
-      "type": "Module",
       "info": null,
       "isBuiltIn": false,
       "symbol": "Set",
@@ -1137,6 +1050,17 @@
       },
       "isBuiltIn": false,
       "symbol": "System",
+      "meta": {}
+    },
+    {
+      "type": "Module",
+      "info": {
+        "line": 97,
+        "column": 13,
+        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
+      },
+      "isBuiltIn": false,
+      "symbol": "Test",
       "meta": {}
     },
     {
@@ -1718,30 +1642,6 @@
       "meta": {}
     },
     {
-      "type": "(Fn [a, (Ptr SDL_Renderer), b] ())",
-      "info": {
-        "line": 30,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "draw",
-      "meta": {}
-    },
-    {
-      "type": "(Fn [(Ref SDLApp a), (Ptr SDL_Renderer), (Ref Int b)] ())",
-      "info": {
-        "line": 30,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "draw__SDLApp*_int*",
-      "meta": {
-        "hidden": "true"
-      }
-    },
-    {
       "type": "(Fn [a] Int)",
       "info": {
         "line": 0,
@@ -1751,56 +1651,6 @@
       "isBuiltIn": false,
       "symbol": "enum-to-int",
       "meta": {}
-    },
-    {
-      "type": "(Fn [SDL_Keycode] Int)",
-      "info": {
-        "line": -1,
-        "column": -1,
-        "file": "enum-to-int__SDL_Keycode template"
-      },
-      "isBuiltIn": false,
-      "symbol": "enum-to-int__SDL_Keycode",
-      "meta": {
-        "hidden": "true"
-      }
-    },
-    {
-      "type": "(Fn [SDL_WindowEventID] Int)",
-      "info": {
-        "line": -1,
-        "column": -1,
-        "file": "enum-to-int__SDL_WindowEventID template"
-      },
-      "isBuiltIn": false,
-      "symbol": "enum-to-int__SDL_WindowEventID",
-      "meta": {
-        "hidden": "true"
-      }
-    },
-    {
-      "type": "(Fn [(Ref SDLApp a), b, (Ref SDL_Event c)] b)",
-      "info": {
-        "line": 65,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "event-handler",
-      "meta": {}
-    },
-    {
-      "type": "(Fn [(Ref SDLApp a), Int, (Ref SDL_Event b)] Int)",
-      "info": {
-        "line": 65,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "event-handler__int",
-      "meta": {
-        "hidden": "true"
-      }
     },
     {
       "type": "Dynamic",
@@ -2051,17 +1901,6 @@
       "meta": {}
     },
     {
-      "type": "Images",
-      "info": {
-        "line": 28,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "images",
-      "meta": {}
-    },
-    {
       "type": "Dynamic",
       "info": {
         "line": 263,
@@ -2189,17 +2028,6 @@
       },
       "isBuiltIn": false,
       "symbol": "mac-target?",
-      "meta": {}
-    },
-    {
-      "type": "(Fn [] ())",
-      "info": {
-        "line": 86,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "main",
       "meta": {}
     },
     {
@@ -2438,19 +2266,6 @@
       "meta": {}
     },
     {
-      "type": "(Fn [Int] Bool)",
-      "info": {
-        "line": 67,
-        "column": 2,
-        "file": "/Users/oliverfencott/.carp/core/Generics.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "pos?__int",
-      "meta": {
-        "hidden": "true"
-      }
-    },
-    {
       "type": "Macro",
       "info": {
         "line": 72,
@@ -2550,28 +2365,6 @@
       "meta": {}
     },
     {
-      "type": "(Fn [] Int)",
-      "info": {
-        "line": 15,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "r",
-      "meta": {}
-    },
-    {
-      "type": "Int",
-      "info": {
-        "line": 13,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "rand-max",
-      "meta": {}
-    },
-    {
       "type": "(Fn [] a)",
       "info": {
         "line": 104,
@@ -2591,17 +2384,6 @@
       },
       "isBuiltIn": false,
       "symbol": "random-0-1",
-      "meta": {}
-    },
-    {
-      "type": "(Fn [] (Array SDL_Point))",
-      "info": {
-        "line": 18,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "random-lines",
       "meta": {}
     },
     {
@@ -2644,28 +2426,6 @@
       },
       "isBuiltIn": false,
       "symbol": "save-docs",
-      "meta": {}
-    },
-    {
-      "type": "Dynamic",
-      "info": {
-        "line": 10,
-        "column": 42,
-        "file": "/Users/oliverfencott/.carp/core/SDL.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "sdl-windows-header-path",
-      "meta": {}
-    },
-    {
-      "type": "Dynamic",
-      "info": {
-        "line": 11,
-        "column": 43,
-        "file": "/Users/oliverfencott/.carp/core/SDL.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "sdl-windows-library-path",
       "meta": {}
     },
     {
@@ -2806,30 +2566,6 @@
       "isBuiltIn": false,
       "symbol": "thread-last-internal",
       "meta": {}
-    },
-    {
-      "type": "(Fn [a] a)",
-      "info": {
-        "line": 84,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "tick",
-      "meta": {}
-    },
-    {
-      "type": "(Fn [Int] Int)",
-      "info": {
-        "line": 84,
-        "column": 2,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "tick__int",
-      "meta": {
-        "hidden": "true"
-      }
     },
     {
       "type": "Macro",

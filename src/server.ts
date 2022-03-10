@@ -4,8 +4,6 @@ import {
   CompletionItem,
   CompletionItemKind,
   createConnection,
-  Diagnostic,
-  DiagnosticSeverity,
   DidChangeConfigurationNotification,
   InitializeParams,
   InitializeResult,
@@ -51,9 +49,6 @@ connection.onInitialize((params: InitializeParams) => {
       hoverProvider: true,
       textDocumentSync: TextDocumentSyncKind.Incremental,
       // Tell the client that this server supports code completion.
-      codeLensProvider: {
-        resolveProvider: true
-      },
       completionProvider: {
         resolveProvider: true
       }
@@ -108,168 +103,56 @@ connection.onDidChangeConfiguration(change => {
       (change.settings.languageServerExample || defaultSettings)
     );
   }
-
-  // Revalidate all open text documents
-  documents.all().forEach(validateTextDocument);
 });
-
-function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
-  if (!hasConfigurationCapability) {
-    return Promise.resolve(globalSettings);
-  }
-  let result = documentSettings.get(resource);
-  if (!result) {
-    result = connection.workspace.getConfiguration({
-      scopeUri: resource,
-      section: 'languageServerExample'
-    });
-    documentSettings.set(resource, result);
-  }
-  return result;
-}
 
 // Only keep settings for open documents
 documents.onDidClose(e => {
   documentSettings.delete(e.document.uri);
 });
 
-// The content of a text document has changed. This event is emitted
-// when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-  validateTextDocument(change.document);
-});
+// connection.onCodeLens(action => {
+//   const state = Carp.getState();
 
-connection.onCodeLens(action => {
-  const state = Carp.getState();
+//   if (state) {
+//     return state.bindings.flatMap(binding => {
+//       if (
+//         !binding.info ||
+//         !binding.type ||
+//         'file://' + binding.info.file != action.textDocument.uri
+//       ) {
+//         return [];
+//       }
 
-  if (state) {
-    return state.bindings.flatMap(binding => {
-      if (
-        !binding.info ||
-        !binding.type ||
-        'file://' + binding.info.file != action.textDocument.uri
-      ) {
-        return [];
-      }
-
-      return [
-        {
-          command: {
-            command: 'my-comm',
-            title: binding.type
-          },
-          range: {
-            start: {
-              character: binding.info.column,
-              line: binding.info.line - 1
-            },
-            end: {
-              character: binding.info.column + binding.symbol.length,
-              line: binding.info.line - 1
-            }
-          }
-        }
-      ];
-    });
-  }
-});
-
-// connection.onCodeLensResolve(action => {
-//   return action;
+//       return [
+//         {
+//           command: {
+//             command: 'my-comm',
+//             title: binding.type
+//           },
+//           range: {
+//             start: {
+//               character: binding.info.column,
+//               line: binding.info.line - 1
+//             },
+//             end: {
+//               character: binding.info.column + binding.symbol.length,
+//               line: binding.info.line - 1
+//             }
+//           }
+//         }
+//       ];
+//     });
+//   }
 // });
 
-connection.onHover((document, _token, _progressReporter, e) => {
-  const { position } = document;
-  const uri = document.textDocument.uri.replace('file://', '');
-  document.textDocument.uri;
-
-  const state = Carp.getState();
-
-  if (!state || !Array.isArray(state.bindings)) {
-    return;
-  }
-
-  const current = state.bindings.find(x => {
-    return x.isBuiltIn;
+// @ts-ignore
+connection.onHover((document, _token, _progressReporter) => {
+  // document.position.
+  return Carp.hover({
+    filePath: document.textDocument.uri,
+    ...document.position
   });
-
-  if (current) {
-    const docString = current.meta['doc'];
-    return {
-      contents: [
-        {
-          value: typeof docString == 'string' ? docString : 'Here is some info',
-          isTrusted: true,
-          language: 'carp'
-        }
-      ]
-    };
-  }
-
-  return {
-    contents: [
-      {
-        value: [
-          '```',
-          `Hello, from HoverProvider but on the server!`,
-          `__Line__: ${position.line}`,
-          `__Char__: ${position.character}`,
-          '```'
-        ].join('\n'),
-        language: 'carp',
-        isTrusted: true
-      }
-    ]
-  };
 });
-
-async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-  // In this simple example we get the settings for every validate run.
-  let settings = await getDocumentSettings(textDocument.uri);
-
-  // The validator creates diagnostics for all uppercase words length 2 and more
-  let text = textDocument.getText();
-  let pattern = /\b[A-Z]{2,}\b/g;
-  let m: RegExpExecArray | null;
-
-  let problems = 0;
-  let diagnostics: Diagnostic[] = [];
-  while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-    problems++;
-
-    let diagnostic: Diagnostic = {
-      severity: DiagnosticSeverity.Warning,
-      range: {
-        start: textDocument.positionAt(m.index),
-        end: textDocument.positionAt(m.index + m[0].length)
-      },
-      message: `${m[0]} is all uppercase.`,
-      source: 'CarpLSP'
-    };
-    if (hasDiagnosticRelatedInformationCapability) {
-      diagnostic.relatedInformation = [
-        {
-          location: {
-            uri: textDocument.uri,
-            range: Object.assign({}, diagnostic.range)
-          },
-          message: 'Spelling matters'
-        },
-        {
-          location: {
-            uri: textDocument.uri,
-            range: Object.assign({}, diagnostic.range)
-          },
-          message: 'Particularly for names'
-        }
-      ];
-    }
-    diagnostics.push(diagnostic);
-  }
-
-  // Send the computed diagnostics to VS Code.
-  connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
-}
 
 documents.onDidSave(change => {
   const response = Carp.exec({
@@ -297,26 +180,6 @@ documents.onDidSave(change => {
   } else {
     console.log("Somehow isn't dev");
   }
-
-  // connection.sendDiagnostics({
-  //   uri: change.document.uri,
-  //   diagnostics: [
-  //     {
-  //       severity: DiagnosticSeverity.Information,
-  //       message: 'hello',
-  //       range: {
-  //         start: {
-  //           line: 0,
-  //           character: 0
-  //         },
-  //         end: {
-  //           line: 0,
-  //           character: 10
-  //         }
-  //       }
-  //     }
-  //   ]
-  // });
 
   return Promise.resolve();
 });
