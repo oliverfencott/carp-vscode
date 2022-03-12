@@ -31,7 +31,8 @@ export class Carp {
         data = stripColor(data.toString());
 
         if (data.endsWith(PROMPT)) {
-          this._carp.off('data', onData);
+          this._carp.stdout.off('data', onData);
+
           res(void 0);
         }
       };
@@ -50,7 +51,8 @@ export class Carp {
 
           if (data.endsWith(PROMPT)) {
             text += data.slice(0, -PROMPT.length);
-            this._carp.off('data', onData);
+            this._carp.stdout.off('data', onData);
+
             res(void 0);
           } else {
             text += data;

@@ -111,11 +111,7 @@ documents.onDidClose(e => {
   documentSettings.delete(e.document.uri);
 });
 
-// @ts-ignore
-connection.onHover((document, _token, _progressReporter) => {
-  // return {
-  //   contents: 'hi'
-  // };
+connection.onHover(async (document, _token, _progressReporter) => {
   return carp.hover({
     filePath: document.textDocument.uri.replace('file://', ''),
     line: document.position.line + 1,
