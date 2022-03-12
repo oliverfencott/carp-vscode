@@ -11,7 +11,7 @@ export class Carp {
 
   constructor() {
     if (IS_DEV) {
-      this._carp = spawn(`stack`, ['run', '--', '--prompt', PROMPT], {
+      this._carp = spawn(`stack`, ['run', '--', '--prompt', PROMPT, '-l'], {
         cwd: '../carp'
       });
     } else {
@@ -48,6 +48,8 @@ export class Carp {
       const prom = new Promise(res => {
         const onData = (data: Buffer | string) => {
           data = stripColor(data.toString());
+
+          console.log(data);
 
           if (data.endsWith(PROMPT)) {
             text += data.slice(0, -PROMPT.length);
@@ -94,17 +96,8 @@ export class Carp {
   }
 
   check({ filePath }: { filePath: string }) {
-    const splitter = makeRandomString();
-    return this._execute(
-      [
-        //
-        `(macro-log "${splitter}")`,
-        `(load "${filePath}")`
-      ].join('')
-    ).then(res => {
+    return this._execute([`(load "${filePath}")`].join('')).then(res => {
       console.log(res);
-
-      [, res] = res.split(splitter);
 
       return res;
     });

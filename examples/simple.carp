@@ -1,18 +1,39 @@
 (load "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/simple-1.carp")
 
-(doc Simple "Simple module documentation")
+
+(doc Simple "Simple module documentation AND I DID IT")
 (defmodule Simple    
   (doc identity "Takes a string and returns a string")
   (defn identity [str]
-    (the String str))
+    (the Int str))
 
   (doc hello "Docs for hello")
   (def hello "Simple1.hello")
   ;; (def hello "world")
 
-  (defn x [arg-aaa arg-bbb]
+  (defn xxxxxx [arg-aaa arg-bbb]
     (+ arg-aaa arg-bbb))
 
-  (defmodule Two
-    (def two-world 1))
+  ;; (defmodule Two
+  ;;   (def two-world hello))
+  )
+
+
+(defmodule Simple2
+  (doc identity "Takes a string and returns a string")
+  (defn identity [str]
+    (the Int str))
+
+  (doc hello "It's simply a float")
+  (def hello 12345.12)
+  ;; (def hello "world")
+
+  (defn xxxxxx [arg-aaa arg-bbb]
+    (+ 1 2))
+
+  ;; (doc Simple2 "SOMEHOW FROM HERE AGAIN")
+  ;; (print-doc Simple2)
+
+  ;; (defmodule Two
+  ;;   (def two-world hello))
   )
