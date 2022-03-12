@@ -93,6 +93,23 @@ export class Carp {
     });
   }
 
+  check({ filePath }: { filePath: string }) {
+    const splitter = makeRandomString();
+    return this._execute(
+      [
+        //
+        `(macro-log "${splitter}")`,
+        `(load "${filePath}")`
+      ].join('')
+    ).then(res => {
+      console.log(res);
+
+      [, res] = res.split(splitter);
+
+      return res;
+    });
+  }
+
   quit() {
     return this._execute('(quit)');
   }

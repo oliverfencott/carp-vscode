@@ -2,5 +2,7 @@
 
 (defmodule MyMod
   (defn hello [x]
-    (the String x)  
-  ))
+    (the String x))
+  
+  (def hello 12)
+  )

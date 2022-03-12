@@ -10,6 +10,9 @@
   (def hello "Simple1.hello")
   ;; (def hello "world")
 
+  (defn x [arg-aaa arg-bbb]
+    (+ arg-aaa arg-bbb))
+
   (defmodule Two
     (def two-world 1))
   )
