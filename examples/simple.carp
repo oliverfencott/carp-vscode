@@ -1,11 +1,12 @@
-(load "examples/simple-1.carp")
+;; (load "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/simple-1.carp")
 
+(doc Simple "Simple module documentation")
 (defmodule Simple    
   (doc identity "Takes a string and returns a string")
   (defn identity [str]
     (the String str))
 
-  (doc hello "ITS CHANGED.")
+  (doc hello "Docs for hello")
   (def hello Simple1.hello)
   ;; (def hello "world")
 

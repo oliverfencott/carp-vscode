@@ -1,4 +1,3 @@
-import { writeFile } from 'fs/promises';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
   CompletionItem,
@@ -12,9 +11,11 @@ import {
   TextDocuments,
   TextDocumentSyncKind
 } from 'vscode-languageserver/node';
+// import Carp from './carp';
 import Carp from './carp';
-import { IS_DEV } from './env';
 import path = require('path');
+
+const carp = new Carp();
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -110,78 +111,44 @@ documents.onDidClose(e => {
   documentSettings.delete(e.document.uri);
 });
 
-// connection.onCodeLens(action => {
-//   const state = Carp.getState();
-
-//   if (state) {
-//     return state.bindings.flatMap(binding => {
-//       if (
-//         !binding.info ||
-//         !binding.type ||
-//         'file://' + binding.info.file != action.textDocument.uri
-//       ) {
-//         return [];
-//       }
-
-//       return [
-//         {
-//           command: {
-//             command: 'my-comm',
-//             title: binding.type
-//           },
-//           range: {
-//             start: {
-//               character: binding.info.column,
-//               line: binding.info.line - 1
-//             },
-//             end: {
-//               character: binding.info.column + binding.symbol.length,
-//               line: binding.info.line - 1
-//             }
-//           }
-//         }
-//       ];
-//     });
-//   }
-// });
-
 // @ts-ignore
 connection.onHover((document, _token, _progressReporter) => {
-  // document.position.
-  return Carp.hover({
-    filePath: document.textDocument.uri,
-    ...document.position
+  // return {
+  //   contents: 'hi'
+  // };
+  return carp.hover({
+    filePath: document.textDocument.uri.replace('file://', ''),
+    line: document.position.line + 1,
+    column: document.position.character
   });
 });
 
 documents.onDidSave(change => {
-  const response = Carp.exec({
-    filePath: change.document.uri
-  });
-
-  if (IS_DEV) {
-    console.log('Is dev');
-    if (response) {
-      console.log('About to write file');
-      writeFile(
-        path.join('../carp-vscode/__TEST-OUTPUT__.json'),
-        JSON.stringify(response, null, 2)
-      )
-        .then(() => {
-          console.log('Wrote file');
-        })
-        .catch(e => {
-          console.log(e);
-          console.log('Error writing file');
-        });
-    } else {
-      console.log("Didn't get a response from server");
-    }
-  } else {
-    console.log("Somehow isn't dev");
-  }
-
-  return Promise.resolve();
+  // const response = Carp.exec({
+  //   filePath: change.document.uri
+  // });
+  // if (IS_DEV) {
+  //   console.log('Is dev');
+  //   if (response) {
+  //     console.log('About to write file');
+  //     writeFile(
+  //       path.join('../carp-vscode/__TEST-OUTPUT__.json'),
+  //       JSON.stringify(response, null, 2)
+  //     )
+  //       .then(() => {
+  //         console.log('Wrote file');
+  //       })
+  //       .catch(e => {
+  //         console.log(e);
+  //         console.log('Error writing file');
+  //       });
+  //   } else {
+  //     console.log("Didn't get a response from server");
+  //   }
+  // } else {
+  //   console.log("Somehow isn't dev");
+  // }
+  // return Promise.resolve();
 });
 
 connection.onDidChangeWatchedFiles(_change => {

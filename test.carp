@@ -1,1 +1,6 @@
-(macro-log "hello from test.carp")
+(def the-symbol-x 12)
+
+(defmodule MyMod
+  (defn hello [x]
+    (the String x)  
+  ))

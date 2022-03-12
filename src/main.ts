@@ -1,133 +1,19 @@
-// import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import Carp from './carp';
 
-// const program = spawn('carp');
+async function main() {
+  const carp = new Carp();
 
-// program.stdin.write(':e\n');
+  await carp
+    .hover({
+      filePath: '/Users/oliverfencott/Desktop/projects/carp-vscode/test.carp',
+      line: 4,
+      column: 13
+    })
+    .then(res => {
+      console.log('Completed hover', res);
+    });
 
-// let str = '';
-
-// program.stdout.on('data', (data: Buffer) => {
-//   str += data.toString();
-// });
-
-// program.on('close', () => {
-//   console.log('Program ended');
-// });
-
-// program.stdin.write(':q\n');
-
-// enum Action {
-//   LoadFile,
-//   TypeLookup,
-//   Quit
-// }
-
-// class Carp {
-//   private program: ChildProcessWithoutNullStreams;
-
-//   constructor() {
-//     this.program = spawn('carp');
-//   }
-
-//   action(action: Action) {
-//     //
-//   }
-// }
-import { spawn } from 'child_process';
-import { writeFileSync } from 'fs';
-
-function runInterpreter() {
-  const EXECUTABLE_NAME = 'carp';
-  interface SpawnError {
-    errno?: -2;
-    code?: 'ENOENT';
-    path?: string;
-  }
-
-  const decolorize = (str: string) => str.replace(/\x1B\[\d+m/gi, '');
-
-  const PROMPT = '--PROMPT--';
-  const STARTUP_ARGS = [
-    `--eval-preload`,
-    `(Project.config "prompt" "${PROMPT}")`
-  ];
-
-  const program = spawn(EXECUTABLE_NAME, STARTUP_ARGS);
-
-  program.on('error', (e?: SpawnError) => {
-    if (e && e.code && e.code == 'ENOENT' && e.path == EXECUTABLE_NAME) {
-      console.log(`Couldn't find "${EXECUTABLE_NAME}" in path`);
-    }
-  });
-
-  function send(command: string) {
-    program.stdin.write(command + '\n');
-  }
-
-  let text = '';
-  const texts: string[] = [];
-
-  program.stdout.on('data', (data: Buffer) => {
-    text += decolorize(data.toString());
-
-    if (text.endsWith(PROMPT)) {
-      // console.log('Latest text:', text);
-      writeFileSync('output.txt', text);
-      texts.push(text);
-      text = '';
-    }
-  });
-
-  send(':e');
-  send(':q');
+  return carp.quit();
 }
 
-function runCheck() {
-  const EXECUTABLE_NAME = 'carp';
-  interface SpawnError {
-    errno?: -2;
-    code?: 'ENOENT';
-    path?: string;
-  }
-
-  const decolorize = (str: string) => str.replace(/\x1B\[\d+m/gi, '');
-
-  const STARTUP_ARGS = [`test.carp`, `--check`];
-
-  const program = spawn(EXECUTABLE_NAME, STARTUP_ARGS);
-
-  program.on('error', (e?: SpawnError) => {
-    if (e && e.code && e.code == 'ENOENT' && e.path == EXECUTABLE_NAME) {
-      console.log(`Couldn't find "${EXECUTABLE_NAME}" in path`);
-    }
-  });
-
-  let text = '';
-  const texts: string[] = [];
-
-  program.stderr.on('data', (data: Buffer) => {
-    text += decolorize(data.toString());
-  });
-
-  program.stdout.on('data', (data: Buffer) => {
-    text += decolorize(data.toString());
-
-    // if (text.endsWith(PROMPT)) {
-    //   // console.log('Latest text:', text);
-    //   writeFileSync('output.txt', text);
-    //   texts.push(text);
-    //   text = '';
-    // }
-  });
-
-  program.on('exit', () => {
-    console.log(text);
-
-    console.log('exited program');
-  });
-
-  // send(':e');
-  // send(':q');
-}
-
-runCheck();
+main();

@@ -1013,6 +1013,17 @@
       "meta": {}
     },
     {
+      "type": "Module",
+      "info": {
+        "line": 3,
+        "column": 13,
+        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/simple.carp"
+      },
+      "isBuiltIn": false,
+      "symbol": "Simple",
+      "meta": {}
+    },
+    {
       "type": null,
       "info": null,
       "isBuiltIn": false,
@@ -1050,17 +1061,6 @@
       },
       "isBuiltIn": false,
       "symbol": "System",
-      "meta": {}
-    },
-    {
-      "type": "Module",
-      "info": {
-        "line": 97,
-        "column": 13,
-        "file": "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/test.carp"
-      },
-      "isBuiltIn": false,
-      "symbol": "Test",
       "meta": {}
     },
     {

@@ -12,6 +12,10 @@
 
 ;; (def rand-max 400)
 
+;; (doc HelloJoe "It's a module, alright.")
+;; (defmodule HelloJoe
+;;   (def x 12))
+
 ;; (defn r []
 ;;   (the Int (random-between 0 rand-max)))
 
@@ -94,42 +98,68 @@
 
 
 
-(defmodule Test
-  (doc my-thing "My thing is a variable definition of type: string")
-  (def my-thing "is a string")
+;; ;; (defmodule Test
+;; ;;   (doc my-thing "My thing is a variable definition of type: string")
+;; ;;   (def my-thing "is a string")
 
-  (def my-thing-2 &my-thing)
+;; ;;   (def my-thing-2 &my-thing)
   
-  ;; (doc hello 
-  ;;   "### Docs"
-  ;;   "__here__ is my doc")
-  (doc hello "
-Creates a file system watcher.
+;; ;;   ;; (doc hello 
+;; ;;   ;;   "### Docs"
+;; ;;   ;;   "__here__ is my doc")
+;; ;;   (doc hello "
+;; ;; Creates a file system watcher.
 
-A glob pattern that filters the file events on their absolute path must be provided. Optionally,
-flags to ignore certain kinds of events can be provided. To stop listening to events the watcher must be disposed.
+;; ;; A glob pattern that filters the file events on their absolute path must be provided. Optionally,
+;; ;; flags to ignore certain kinds of events can be provided. To stop listening to events the watcher must be disposed.
 
-*Note* that only files within the current [workspace folders](#workspace.workspaceFolders) can be watched.
+;; ;; *Note* that only files within the current [workspace folders](#workspace.workspaceFolders) can be watched.
 
-*@param* `globPattern` A [glob pattern](#GlobPattern) that is applied to the absolute paths of created, changed,
-and deleted files. Use a [relative pattern](#RelativePattern) to limit events to a certain [workspace folder](#WorkspaceFolder).
+;; ;; *@param* `globPattern` A [glob pattern](#GlobPattern) that is applied to the absolute paths of created, changed,
+;; ;; and deleted files. Use a [relative pattern](#RelativePattern) to limit events to a certain [workspace folder](#WorkspaceFolder).
 
-*@param* `ignoreCreateEvents` Ignore when files have been created.
+;; ;; *@param* `ignoreCreateEvents` Ignore when files have been created.
 
-*@param* `ignoreChangeEvents` Ignore when files have been changed.
+;; ;; *@param* `ignoreChangeEvents` Ignore when files have been changed.
 
-*@param* `ignoreDeleteEvents` Ignore when files have been deleted.
+;; ;; *@param* `ignoreDeleteEvents` Ignore when files have been deleted.
 
-*@return* `A` new file system watcher instance.
+;; ;; *@return* `A` new file system watcher instance.
 
-***
+;; ;; ***
 
-```carp
-(Fn [Int] Int a)
+;; ;; ```carp
+;; ;; (Fn [Int] Int a)
+;; ;; ```
+
+;; ;; ***
+;; ;; 		 ")
+;; ;;   ;; (doc hello "# Header\nhere is my doc")
+;; ;;   (def hello (fn [a] (+ 1 a)))
+;; ;;   (defn hello2 [a] (+ 1 a))
+;; ;; )
+
+
+;; ;; (def reduce Array.reduce)
+
+;; ;; (def hello-2 Test.hello)
+
+(defmodule ModuleA
+  (defmodule ModuleB
+    (doc a-string "
+Consider this:
+    
+```js
+let x = 12;
 ```
+")
+    (def a-string "1")
+    
+    (doc an-int "Docs for an-int")
+    (def an-int 1)
+  )
+)
 
-***
-		 ")
-  ;; (doc hello "# Header\nhere is my doc")
-  (def hello (fn [a] (+ 1 a)))
+(defmodule B
+  (def foo &ModuleA.ModuleB.a-string)
 )
