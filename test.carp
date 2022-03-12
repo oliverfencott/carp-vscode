@@ -4,5 +4,5 @@
   (defn hello [x]
     (the String x))
   
-  (def hello 12)
+  (def hello a-fail)
   )
