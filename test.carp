@@ -3,6 +3,10 @@
 (defmodule MyMod
   (defn hello [x]
     (the String x))
+
+  (defn heres []
+    (let [_the "interesting"] "part")
+  )
   
   ;; (def hello a-fail)
   (def hello (+ "1" {}))

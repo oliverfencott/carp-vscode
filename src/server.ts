@@ -4,6 +4,7 @@ import {
   InitializeResult,
   ProposedFeatures,
   PublishDiagnosticsParams,
+  SymbolInformation,
   TextDocuments,
   TextDocumentSyncKind
 } from 'vscode-languageserver/node';
@@ -20,6 +21,7 @@ function addFileProtocol(path: string) {
 
 const carp = new Carp();
 const diagnosticsCache = new Set<string>();
+const documentSymbolsCache = new Set<string>();
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -32,7 +34,8 @@ connection.onInitialize(_params => {
   const result: InitializeResult = {
     capabilities: {
       hoverProvider: true,
-      textDocumentSync: TextDocumentSyncKind.Incremental
+      textDocumentSync: TextDocumentSyncKind.Incremental,
+      documentSymbolProvider: true
       // Tell the client that this server supports code completion.
       // completionProvider: {
       //   resolveProvider: true
@@ -66,7 +69,7 @@ documents.onDidSave(document => {
   carp
     .check({ filePath: stripFileProtocol(document.document.uri) })
     .then(res => {
-      console.log('got this res:');
+      console.log('on did save request response:');
       console.log(res);
       const responses = res
         .split('\n')
@@ -83,6 +86,42 @@ documents.onDidSave(document => {
 
       responses.forEach(connection.sendDiagnostics);
     });
+});
+
+connection.onDocumentSymbol(async params => {
+  const uri = stripFileProtocol(params.textDocument.uri);
+
+  const res = await carp.textDocumentDocumentSymbol({
+    filePath: uri
+  });
+
+  if (!res) {
+    return;
+  }
+
+  const messages = res.split('\n');
+
+  if (messages.length == 0) {
+    return null;
+  }
+
+  const symbols = messages
+    .map(x => safeParse<SymbolInformation | null>(x))
+    .flatMap(res => {
+      switch (res) {
+        case undefined:
+        case null:
+          return [];
+
+        default:
+          return [res];
+      }
+    });
+
+  documentSymbolsCache.clear();
+  symbols.map(s => s.location.uri).forEach(u => documentSymbolsCache.add(u));
+
+  return symbols;
 });
 
 // Make the text document manager listen on the connection

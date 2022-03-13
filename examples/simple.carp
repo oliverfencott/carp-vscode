@@ -1,20 +1,14 @@
 (load "/Users/oliverfencott/Desktop/projects/carp-vscode/examples/simple-1.carp")
 
-
 (doc Simple "Simple module documentation AND I DID IT")
 (defmodule Simple    
-  (doc identity "Takes a string and returns a string")
-  (defn identity [str]
-    (the Int str))
-
   (doc hello "Docs for hello")
   (def hello "Simple1.hello")
+  
 
   ;; TODO: Come back to this
   (defn special-fn [arg-aaa arg-bbb]
-    (+ (the Int arg-aaa) arg-bbb))
-
-)
+    (+  arg-aaa arg-bbb)))
 
 
 (defmodule Simple2
@@ -28,10 +22,13 @@
   (defn sum-and-inc-1 [arg-aaa arg-bbb]
     (+ (+ 1 arg-bbb) arg-aaa))
 
-  (def something
-    (+ 1 1))
+  (doc one-hundred-twenty-three "Just the int, `123`")
+  (def one-hundred-twenty-three
+    (+ 1 12))
 
 
+
+;; (let f Simple2.one-hundred-twenty-three)
 
   ;; (defn foo [x]
   ;;   (+ 1 hello-there))
@@ -41,4 +38,3 @@
   ;; (defmodule Two
   ;;   (def two-world hello))
   )
-

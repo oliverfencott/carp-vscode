@@ -4,10 +4,11 @@ async function main() {
   const carp = new Carp();
 
   await carp
-    .check({
+    .textDocumentDocumentSymbol({
       filePath: '/Users/oliverfencott/Desktop/projects/carp-vscode/test.carp'
     })
     .then(res => {
+      console.log('textDocumentDocumentSymbol');
       console.log(res);
     });
 

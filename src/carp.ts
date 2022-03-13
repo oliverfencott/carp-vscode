@@ -49,8 +49,6 @@ export class Carp {
         const onData = (data: Buffer | string) => {
           data = stripColor(data.toString());
 
-          console.log(data);
-
           if (data.endsWith(PROMPT)) {
             text += data.slice(0, -PROMPT.length);
             this._carp.stdout.off('data', onData);
@@ -98,6 +96,21 @@ export class Carp {
   check({ filePath }: { filePath: string }) {
     return this._execute([`(load "${filePath}")`].join('')).then(res => {
       console.log(res);
+
+      return res;
+    });
+  }
+
+  textDocumentDocumentSymbol({ filePath }: { filePath: string }) {
+    const splitter = makeRandomString();
+    return this._execute(
+      [
+        `(load "${filePath}")`,
+        `(macro-log "${splitter}")`,
+        `(Analysis.text-document/document-symbol "${filePath}")`
+      ].join('')
+    ).then(res => {
+      [, res] = res.split(splitter);
 
       return res;
     });
