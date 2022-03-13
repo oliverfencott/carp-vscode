@@ -1,7 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
   createConnection,
-  DiagnosticSeverity,
   InitializeResult,
   ProposedFeatures,
   PublishDiagnosticsParams,
@@ -9,6 +8,7 @@ import {
   TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import Carp from './carp';
+import { safeParse } from './util';
 
 function stripFileProtocol(path: string) {
   return path.replace('file://', '');
@@ -19,6 +19,7 @@ function addFileProtocol(path: string) {
 }
 
 const carp = new Carp();
+const diagnosticsCache = new Set<string>();
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -31,11 +32,11 @@ connection.onInitialize(_params => {
   const result: InitializeResult = {
     capabilities: {
       hoverProvider: true,
-      textDocumentSync: TextDocumentSyncKind.Incremental,
+      textDocumentSync: TextDocumentSyncKind.Incremental
       // Tell the client that this server supports code completion.
-      completionProvider: {
-        resolveProvider: true
-      }
+      // completionProvider: {
+      //   resolveProvider: true
+      // }
     }
   };
 
@@ -53,53 +54,34 @@ connection.onHover(async (document, _token, _progressReporter) => {
 });
 
 documents.onDidSave(document => {
+  diagnosticsCache.forEach(uri => {
+    connection.sendDiagnostics({
+      uri,
+      diagnostics: []
+    });
+  });
+
+  diagnosticsCache.clear();
+
   carp
     .check({ filePath: stripFileProtocol(document.document.uri) })
     .then(res => {
-      const responses = res.split('<--->').map(s => s.trim());
-      const messages: PublishDiagnosticsParams[] = responses.flatMap(
-        message => {
-          const ERROR_STRING = '[ERROR]\n';
-          if (message.startsWith(ERROR_STRING)) {
-            const [, rest] = message.split(ERROR_STRING);
-            const [info, ...msg] = rest.split(' ');
-            const [path, line, col] = info.split(':');
+      console.log('got this res:');
+      console.log(res);
+      const responses = res
+        .split('\n')
+        .map(x => safeParse<PublishDiagnosticsParams>(x))
+        .filter(Boolean) as PublishDiagnosticsParams[];
 
-            return [
-              {
-                uri: addFileProtocol(path),
-                diagnostics: [
-                  {
-                    severity: DiagnosticSeverity.Error,
-                    message: msg.join(' '),
-                    range: {
-                      start: {
-                        line: Number(line) - 1,
-                        character: Number(col)
-                      },
-                      end: {
-                        line: Number(line),
-                        character: Number(col) + 1
-                      }
-                    }
-                  }
-                ]
-              }
-            ];
-          }
+      if (!responses.length) {
+        return [];
+      }
 
-          return [];
-        }
-      );
+      responses.forEach(response => {
+        diagnosticsCache.add(response.uri);
+      });
 
-      console.log('RESPONSES:', responses);
-      console.log('MESSAGES:', JSON.stringify(messages, null, 2));
-
-      //       [ERROR]
-      // /Users/oliverfencott/Desktop/projects/carp-vscode/examples/simple.carp:32:8 Trying to refer to an undefined symbol 'aaaaa'.
-      // <--->
-
-      messages.forEach(connection.sendDiagnostics);
+      responses.forEach(connection.sendDiagnostics);
     });
 });
 

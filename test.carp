@@ -4,5 +4,6 @@
   (defn hello [x]
     (the String x))
   
-  (def hello a-fail)
+  ;; (def hello a-fail)
+  (def hello (+ "1" {}))
   )

@@ -9,31 +9,36 @@
 
   (doc hello "Docs for hello")
   (def hello "Simple1.hello")
-  ;; (def hello "world")
 
-  (defn xxxxxx [arg-aaa arg-bbb]
-    (+ arg-aaa arg-bbb))
+  ;; TODO: Come back to this
+  (defn special-fn [arg-aaa arg-bbb]
+    (+ (the Int arg-aaa) arg-bbb))
 
-  ;; (defmodule Two
-  ;;   (def two-world hello))
-  )
+)
 
 
 (defmodule Simple2
-  (doc identity "Takes a string and returns a string")
+  (doc identity "Takes an int and returns an int")
   (defn identity [str]
     (the Int str))
 
   (doc hello "It's simply a float")
   (def hello 12345.12)
-  ;; (def hello "world")
 
-  (defn xxxxxx [arg-aaa arg-bbb]
-    (+ 1 2))
+  (defn sum-and-inc-1 [arg-aaa arg-bbb]
+    (+ (+ 1 arg-bbb) arg-aaa))
 
+  (def something
+    (+ 1 1))
+
+
+
+  ;; (defn foo [x]
+  ;;   (+ 1 hello-there))
   ;; (doc Simple2 "SOMEHOW FROM HERE AGAIN")
   ;; (print-doc Simple2)
 
   ;; (defmodule Two
   ;;   (def two-world hello))
   )
+
