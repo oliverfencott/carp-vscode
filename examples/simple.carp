@@ -8,8 +8,8 @@
 
   ;; TODO: Come back to this
   (defn special-fn [arg-aaa arg-bbb]
-    (+  arg-aaa arg-bbb)))
-
+    (+ arg-aaa (+ 10.01 arg-bbb)))
+)
 
 (defmodule Simple2
   (doc identity "Takes an int and returns an int")
@@ -24,17 +24,7 @@
 
   (doc one-hundred-twenty-three "Just the int, `123`")
   (def one-hundred-twenty-three
-    (+ 1 12))
+    (+ 1 122))
 
-
-
-;; (let f Simple2.one-hundred-twenty-three)
-
-  ;; (defn foo [x]
-  ;;   (+ 1 hello-there))
-  ;; (doc Simple2 "SOMEHOW FROM HERE AGAIN")
-  ;; (print-doc Simple2)
-
-  ;; (defmodule Two
-  ;;   (def two-world hello))
-  )
+  (def foo Array.find)
+)

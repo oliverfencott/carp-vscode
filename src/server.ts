@@ -48,44 +48,22 @@ connection.onInitialize(_params => {
 
 connection.onExit(() => carp.quit());
 
+/** Validate file on open */
+connection.onDidOpenTextDocument(params => {
+  checkFile(params.textDocument.uri);
+});
+
+/** Validate file on save */
+documents.onDidSave(params => {
+  checkFile(params.document.uri);
+});
+
 connection.onHover(async (document, _token, _progressReporter) => {
   return carp.hover({
     filePath: stripFileProtocol(document.textDocument.uri),
     line: document.position.line + 1,
     column: document.position.character
   });
-});
-
-documents.onDidSave(document => {
-  diagnosticsCache.forEach(uri => {
-    connection.sendDiagnostics({
-      uri,
-      diagnostics: []
-    });
-  });
-
-  diagnosticsCache.clear();
-
-  carp
-    .check({ filePath: stripFileProtocol(document.document.uri) })
-    .then(res => {
-      console.log('on did save request response:');
-      console.log(res);
-      const responses = res
-        .split('\n')
-        .map(x => safeParse<PublishDiagnosticsParams>(x))
-        .filter(Boolean) as PublishDiagnosticsParams[];
-
-      if (!responses.length) {
-        return [];
-      }
-
-      responses.forEach(response => {
-        diagnosticsCache.add(response.uri);
-      });
-
-      responses.forEach(connection.sendDiagnostics);
-    });
 });
 
 connection.onDocumentSymbol(async params => {
@@ -130,3 +108,33 @@ documents.listen(connection);
 
 // Listen on the connection
 connection.listen();
+
+function checkFile(uri: string) {
+  diagnosticsCache.forEach(uri => {
+    connection.sendDiagnostics({
+      uri,
+      diagnostics: []
+    });
+  });
+
+  diagnosticsCache.clear();
+
+  carp.check({ filePath: stripFileProtocol(uri) }).then(res => {
+    console.log('on did save request response:');
+    console.log(res);
+    const responses = res
+      .split('\n')
+      .map(x => safeParse<PublishDiagnosticsParams>(x))
+      .filter(Boolean) as PublishDiagnosticsParams[];
+
+    if (!responses.length) {
+      return [];
+    }
+
+    responses.forEach(response => {
+      diagnosticsCache.add(response.uri);
+    });
+
+    responses.forEach(connection.sendDiagnostics);
+  });
+}
