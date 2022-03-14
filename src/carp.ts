@@ -1,5 +1,5 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
-import { Hover } from 'vscode-languageserver-protocol';
+import { Definition, Hover } from 'vscode-languageserver-protocol';
 import { IS_DEV } from './env';
 import { makeRandomString, safeParse, stripColor } from './util';
 
@@ -42,6 +42,14 @@ export class Carp {
   }
 
   private _execute(command: string) {
+    /**
+     * TODO: The logic here is incorrect.
+     * In order to function properly, "this._resolve"
+     * should be mutated immediately, something like:
+     * this._resolve = this._resolve.then(() => {
+     *   callbackThatReturnsAPromise()
+     * })
+     */
     return this._resolve.then(() => {
       let text = '';
 
@@ -113,6 +121,31 @@ export class Carp {
       [, res] = res.split(splitter);
 
       return res;
+    });
+  }
+
+  textDocumentDefinition({
+    filePath,
+    line,
+    column
+  }: {
+    filePath: string;
+    line: number;
+    column: number;
+  }) {
+    const splitter = makeRandomString();
+    return this._execute(
+      [
+        `(load "${filePath}")`,
+        `(macro-log "${splitter}")`,
+        `(Analysis.text-document/definition "${filePath}" ${line} ${column})`
+      ].join('')
+    ).then(res => {
+      console.log('Response from textDocumentDefinition', res);
+      [, res] = res.split(splitter);
+      const response = safeParse<Definition>(res);
+
+      return response;
     });
   }
 

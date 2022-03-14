@@ -1,100 +1,101 @@
 
-;; (use IO)
-;; (use System)
-;; (use Int)
-;; (use Double)
-;; (use Array)
 
-;; (load "SDL.carp")
-;; (load "SDL_image.carp")
+(use IO)
+(use System)
+(use Int)
+(use Double)
+(use Array)
 
-;; (Project.config "title" "Game")
+(load "SDL.carp")
+(load "SDL_image.carp")
 
-;; (def rand-max 400)
+(Project.config "title" "Game")
 
-;; (doc HelloJoe "It's a module, alright.")
-;; (defmodule HelloJoe
-;;   (def x 12))
+(def rand-max 400)
 
-;; (defn r []
-;;   (the Int (random-between 0 rand-max)))
+(doc HelloJoe "It's a module, alright.")
+(defmodule HelloJoe
+  (def x 12))
 
-;; (defn random-lines []
-;;   (let [p1 (SDL.point (r) (r))
-;;         p2 (SDL.point (r) (r))
-;;         p3 (SDL.point (r) (r))]
-;;     [p1 p2 p3 p1]))
+(defn r []
+  (the Int (random-between 0 rand-max)))
 
-;; (deftype Images
-;;     [img1 (Ptr SDL_Texture)
-;;      img2 (Ptr SDL_Texture)])
+(defn random-lines []
+  (let [p1 (SDL.point (r) (r))
+        p2 (SDL.point (r) (r))
+        p3 (SDL.point (r) (r))]
+    [p1 p2 p3 p1]))
 
-;; (def images (Images.init NULL NULL))
+(deftype Images
+    [img1 (Ptr SDL_Texture)
+     img2 (Ptr SDL_Texture)])
 
-;; (defn draw [app rend state-ref]
-;;   (let [rect (SDL.rect 32 32 (- 512 64) (- 512 64))]
-;;     (do
-;;       (SDL.set-render-draw-blend-mode rend SDL.blend-mode-add)
-;;       (SDL.set-render-draw-color rend 0 0 0 255)
-;;       (SDL.render-clear rend)
-;;       (SDL.set-render-draw-color rend 200 250 255 255)
-;;       (SDL.render-fill-rect rend (Pointer.address &rect))
-;;       (SDL.set-render-draw-color rend 100 50 255 155)
-;;       (let [mouse-state (SDL.MouseState.get)
-;;             x @(SDL.MouseState.x &mouse-state)
-;;             rects [(SDL.rect x 48 16 16)
-;;                    (SDL.rect (* x 2) 80 16 16)
-;;                    (SDL.rect (* x 4) 112 16 16)
-;;                    (SDL.rect (* x 8) 144 16 16)]
-;;             n (length &rects)]
-;;         (SDL.render-fill-rects rend (raw rects) n))
-;;       (SDL.set-render-draw-color rend 255 50 100 255)
-;;       (for [x 0 512 16]
-;;         (do
-;;           (SDL.render-draw-line rend x 0 512 512)
-;;           (SDL.render-draw-line rend 512 (+ 256 (/ x 2)) 0 512)))
-;;       (SDL.set-render-draw-color rend 0 0 0 255)
-;;       (let [lines (random-lines)
-;;             n (length &lines)]
-;;         (SDL.render-draw-lines rend (raw lines) n))
-;;       (let [img @(Images.img1 &images)]
-;;         (SDL.render-copy-ex rend
-;;                             img
-;;                             (Pointer.address &(SDL.dimensions img))
-;;                             (Pointer.address &(SDL.rect 100 100 300 300))
-;;                             (* 0.1 (from-int (SDL.get-ticks)))
-;;                             (Pointer.address &(SDL.point 150 150))
-;;                             SDL.flip-none)))))
+(def images (Images.init NULL NULL))
 
-;; (defn event-handler [app state event]
-;;   (let [et (SDL.Event.type event)]
-;;     (cond
-;;       ;; Quit event
-;;       (= et SDL.Event.quit)
-;;       (SDLApp.stop app)
+(defn draw [app rend state-ref]
+  (let [rect (SDL.rect 32 32 (- 512 64) (- 512 64))]
+    (do
+      (SDL.set-render-draw-blend-mode rend SDL.blend-mode-add)
+      (SDL.set-render-draw-color rend 0 0 0 255)
+      (SDL.render-clear rend)
+      (SDL.set-render-draw-color rend 200 250 255 255)
+      (SDL.render-fill-rect rend (Pointer.address &rect))
+      (SDL.set-render-draw-color rend 100 50 255 155)
+      (let [mouse-state (SDL.MouseState.get)
+            x @(SDL.MouseState.x &mouse-state)
+            rects [(SDL.rect x 48 16 16)
+                   (SDL.rect (* x 2) 80 16 16)
+                   (SDL.rect (* x 4) 112 16 16)
+                   (SDL.rect (* x 8) 144 16 16)]
+            n (length &rects)]
+        (SDL.render-fill-rects rend (raw rects) n))
+      (SDL.set-render-draw-color rend 255 50 100 255)
+      (for [x 0 512 16]
+        (do
+          (SDL.render-draw-line rend x 0 512 512)
+          (SDL.render-draw-line rend 512 (+ 256 (/ x 2)) 0 512)))
+      (SDL.set-render-draw-color rend 0 0 0 255)
+      (let [lines (random-lines)
+            n (length &lines)]
+        (SDL.render-draw-lines rend (raw lines) n))
+      (let [img @(Images.img1 &images)]
+        (SDL.render-copy-ex rend
+                            img
+                            (Pointer.address &(SDL.dimensions img))
+                            (Pointer.address &(SDL.rect 100 100 300 300))
+                            (* 0.1 (from-int (SDL.get-ticks)))
+                            (Pointer.address &(SDL.point 150 150))
+                            SDL.flip-none)))))
 
-;;       ;; Key events
-;;       (= et SDL.Event.key-down)
-;;       (let [key (SDL.Event.keycode event)]
-;;         (cond
-;;           (= key SDL.Keycode.escape) (SDLApp.stop app)
-;;           (= key SDL.Keycode.backspace) (do (println "!")
-;;                                             state)
-;;           state))
+(defn event-handler [app state event]
+  (let [et (SDL.Event.type event)]
+    (cond
+      ;; Quit event
+      (= et SDL.Event.quit)
+      (SDLApp.stop app)
 
-;;       ;; Other event
-;;       state)))
+      ;; Key events
+      (= et SDL.Event.key-down)
+      (let [key (SDL.Event.keycode event)]
+        (cond
+          (= key SDL.Keycode.escape) (SDLApp.stop app)
+          (= key SDL.Keycode.backspace) (do (println "!")
+                                            state)
+          state))
 
-;; (defn tick [state] state)
+      ;; Other event
+      state)))
 
-;; (defn main []
-;;   (let [app (SDLApp.create "~ CARP ~" 512 512)
-;;         rend @(SDLApp.renderer &app)
-;;         initial-state 0]
-;;     (do
-;;       (set! images (Images.init (IMG.load-texture rend (cstr "./resources/logo/square.png"))
-;;                                 (IMG.load-texture rend (cstr "./resources/logo/carp_logo_969_no_texture.png"))))
-;;       (SDLApp.run-with-callbacks &app event-handler tick draw initial-state))))
+(defn tick [state] state)
+
+(defn main []
+  (let [app (SDLApp.create "~ CARP ~" 512 512)
+        rend @(SDLApp.renderer &app)
+        initial-state 0]
+    (do
+      (set! images (Images.init (IMG.load-texture rend (cstr "./resources/logo/square.png"))
+                                (IMG.load-texture rend (cstr "./resources/logo/carp_logo_969_no_texture.png"))))
+      (SDLApp.run-with-callbacks &app event-handler tick draw initial-state))))
 
 
 
@@ -144,22 +145,34 @@
 
 ;; ;; (def hello-2 Test.hello)
 
-(defmodule ModuleA
-  (defmodule ModuleB
-    (doc a-string "
-Consider this:
+;; (defmodule ModuleA
+;;   (doc ModuleB "Docs for ModuleB")
+;;   (defmodule ModuleB
+;;     (doc a-string "
+;; Consider this:
     
-```js
-let x = 12;
-```
-")
-    (def a-string "1")
-    
-    (doc an-int "Docs for an-int")
-    (def an-int 1)
-  )
-)
+;; ```js
+;; let x = 12;
+;; ```
 
-(defmodule B
-  (def foo &ModuleA.ModuleB.a-string)
-)
+;; ```carp
+;; (def x 12)
+;; ```
+;; ")
+;;     (def a-string "1")
+    
+;;     (doc an-int "Docs for an-int")
+;;     (def an-int 1)
+;;   )
+
+;;   (doc Bmodule "has it's own docs now")
+;;   (defmodule Bmodule
+;;     (def foo Array.reduce)
+;;   )
+;; )
+
+;; (defn yes [f x xs]
+;;   (Array.reduce f x xs))
+
+;; (def negated-no yes)
+

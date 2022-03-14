@@ -1,5 +1,7 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
+  CompletionItemKind,
+  CompletionTriggerKind,
   createConnection,
   InitializeResult,
   ProposedFeatures,
@@ -35,7 +37,11 @@ connection.onInitialize(_params => {
     capabilities: {
       hoverProvider: true,
       textDocumentSync: TextDocumentSyncKind.Incremental,
-      documentSymbolProvider: true
+      documentSymbolProvider: true,
+      definitionProvider: true,
+      completionProvider: {
+        triggerCharacters: ['.']
+      }
       // Tell the client that this server supports code completion.
       // completionProvider: {
       //   resolveProvider: true
@@ -47,6 +53,53 @@ connection.onInitialize(_params => {
 });
 
 connection.onExit(() => carp.quit());
+
+connection.onCompletion(params => {
+  console.log(JSON.stringify(params, null, 2));
+
+  if (params.context?.triggerKind == CompletionTriggerKind.TriggerCharacter) {
+    if (params.context.triggerCharacter == '.') {
+      // TODO: Get a list of all available modules and autocomplete them
+    }
+  }
+
+  const types: [string, CompletionItemKind][] = [
+    ['Text', 1],
+    ['Method', 2],
+    ['Function', 3],
+    ['Constructor', 4],
+    ['Field', 5],
+    ['Variable', 6],
+    ['Class', 7],
+    ['Interface', 8],
+    ['Module', 9],
+    ['Property', 10],
+    ['Unit', 11],
+    ['Value', 12],
+    ['Enum', 13],
+    ['Keyword', 14],
+    ['Snippet', 15],
+    ['Color', 16],
+    ['File', 17],
+    ['Reference', 18],
+    ['Folder', 19],
+    ['EnumMember', 20],
+    ['Constant', 21],
+    ['Struct', 22],
+    ['Event', 23],
+    ['Operator', 24],
+    ['TypeParameter', 25]
+  ];
+
+  return types.map(([label, kind]) => {
+    return {
+      label: label + ' example',
+      detail: label.toLowerCase() + '-thing',
+      documentation: `The docs for ${label}`,
+      kind
+    };
+  });
+});
 
 /** Validate file on open */
 connection.onDidOpenTextDocument(params => {
@@ -62,7 +115,7 @@ connection.onHover(async (document, _token, _progressReporter) => {
   return carp.hover({
     filePath: stripFileProtocol(document.textDocument.uri),
     line: document.position.line + 1,
-    column: document.position.character
+    column: document.position.character + 1
   });
 });
 
@@ -100,6 +153,20 @@ connection.onDocumentSymbol(async params => {
   symbols.map(s => s.location.uri).forEach(u => documentSymbolsCache.add(u));
 
   return symbols;
+});
+
+connection.onDefinition(async params => {
+  const response = await carp.textDocumentDefinition({
+    filePath: stripFileProtocol(params.textDocument.uri),
+    line: params.position.line + 1,
+    column: params.position.character + 1
+  });
+
+  if (response) {
+    return response;
+  }
+
+  return null;
 });
 
 // Make the text document manager listen on the connection
