@@ -4,7 +4,7 @@ async function main() {
   const carp = new Carp();
 
   await carp
-    .textDocumentDocumentSymbol({
+    .documentSymbol({
       filePath: '/Users/oliverfencott/Desktop/projects/carp-vscode/test.carp'
     })
     .then(res => {

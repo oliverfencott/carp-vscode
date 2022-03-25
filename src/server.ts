@@ -1,17 +1,16 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
+  CompletionItem,
   CompletionItemKind,
-  CompletionTriggerKind,
   createConnection,
+  Diagnostic,
   InitializeResult,
   ProposedFeatures,
   PublishDiagnosticsParams,
-  SymbolInformation,
   TextDocuments,
   TextDocumentSyncKind
 } from 'vscode-languageserver/node';
 import Carp from './carp';
-import { safeParse } from './util';
 
 function stripFileProtocol(path: string) {
   return path.replace('file://', '');
@@ -21,9 +20,12 @@ function addFileProtocol(path: string) {
   return 'file://' + path;
 }
 
+const caches = {
+  completions: new Map<string, CompletionItem[]>()
+};
+
 const carp = new Carp();
-const diagnosticsCache = new Set<string>();
-const documentSymbolsCache = new Set<string>();
+const diagnosticsCache = new Map<string, Diagnostic[]>();
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -54,14 +56,28 @@ connection.onInitialize(_params => {
 
 connection.onExit(() => carp.quit());
 
-connection.onCompletion(params => {
-  console.log(JSON.stringify(params, null, 2));
+connection.onCompletion(async params => {
+  // const { uri } = params.textDocument;
 
-  if (params.context?.triggerKind == CompletionTriggerKind.TriggerCharacter) {
-    if (params.context.triggerCharacter == '.') {
-      // TODO: Get a list of all available modules and autocomplete them
-    }
-  }
+  // if (caches.completions.has(uri)) {
+  //   return caches.completions.get(uri);
+  // }
+
+  // if (params.context?.triggerKind == CompletionTriggerKind.TriggerCharacter) {
+  //   if (params.context.triggerCharacter == '.') {
+  //     // TODO: Get a list of all available modules and autocomplete them
+  //   }
+  // }
+
+  // const filePath = stripFileProtocol(uri);
+  // const response = await carp.textDocumentCompletion({ filePath });
+
+  // if (response) {
+  //   caches.completions.set(uri, response);
+  //   return response;
+  // }
+
+  return null;
 
   const types: [string, CompletionItemKind][] = [
     ['Text', 1],
@@ -93,8 +109,8 @@ connection.onCompletion(params => {
 
   return types.map(([label, kind]) => {
     return {
-      label: label + ' example',
-      detail: label.toLowerCase() + '-thing',
+      label: label + ' label',
+      detail: label.toLowerCase() + '-detail',
       documentation: `The docs for ${label}`,
       kind
     };
@@ -108,65 +124,46 @@ connection.onDidOpenTextDocument(params => {
 
 /** Validate file on save */
 documents.onDidSave(params => {
+  console.log('Did just save');
+  caches.completions.delete(params.document.uri);
+
   checkFile(params.document.uri);
 });
 
 connection.onHover(async (document, _token, _progressReporter) => {
-  return carp.hover({
+  const { response, diagnostics } = await carp.hover({
     filePath: stripFileProtocol(document.textDocument.uri),
     line: document.position.line + 1,
     column: document.position.character + 1
   });
+
+  clearAndPublishDiagnostics(diagnostics);
+
+  return response;
 });
 
 connection.onDocumentSymbol(async params => {
   const uri = stripFileProtocol(params.textDocument.uri);
 
-  const res = await carp.textDocumentDocumentSymbol({
+  const { response, diagnostics } = await carp.documentSymbol({
     filePath: uri
   });
 
-  if (!res) {
-    return;
-  }
+  clearAndPublishDiagnostics(diagnostics);
 
-  const messages = res.split('\n');
-
-  if (messages.length == 0) {
-    return null;
-  }
-
-  const symbols = messages
-    .map(x => safeParse<SymbolInformation | null>(x))
-    .flatMap(res => {
-      switch (res) {
-        case undefined:
-        case null:
-          return [];
-
-        default:
-          return [res];
-      }
-    });
-
-  documentSymbolsCache.clear();
-  symbols.map(s => s.location.uri).forEach(u => documentSymbolsCache.add(u));
-
-  return symbols;
+  return response;
 });
 
 connection.onDefinition(async params => {
-  const response = await carp.textDocumentDefinition({
+  const { response, diagnostics } = await carp.definition({
     filePath: stripFileProtocol(params.textDocument.uri),
     line: params.position.line + 1,
     column: params.position.character + 1
   });
 
-  if (response) {
-    return response;
-  }
+  clearAndPublishDiagnostics(diagnostics);
 
-  return null;
+  return response;
 });
 
 // Make the text document manager listen on the connection
@@ -177,7 +174,7 @@ documents.listen(connection);
 connection.listen();
 
 function checkFile(uri: string) {
-  diagnosticsCache.forEach(uri => {
+  diagnosticsCache.forEach((_, uri) => {
     connection.sendDiagnostics({
       uri,
       diagnostics: []
@@ -186,22 +183,61 @@ function checkFile(uri: string) {
 
   diagnosticsCache.clear();
 
-  carp.check({ filePath: stripFileProtocol(uri) }).then(res => {
+  carp.validate({ filePath: stripFileProtocol(uri) }).then(res => {
     console.log('on did save request response:');
     console.log(res);
-    const responses = res
-      .split('\n')
-      .map(x => safeParse<PublishDiagnosticsParams>(x))
-      .filter(Boolean) as PublishDiagnosticsParams[];
+    // const responses = res
+    //   .split('\n')
+    //   .map(x => safeParse<PublishDiagnosticsParams>(x))
+    //   .filter(Boolean) as PublishDiagnosticsParams[];
 
-    if (!responses.length) {
-      return [];
-    }
+    // if (!responses.length) {
+    //   return [];
+    // }
 
-    responses.forEach(response => {
-      diagnosticsCache.add(response.uri);
+    // responses.forEach(response => {
+    //   diagnosticsCache.add(response.uri);
+    // });
+
+    // connection.sendDiagnostics({
+    //   uri: '',
+    //   diagnostics: [
+    //     {
+    //       message: 'msg',
+    //       range: {
+    //         start: { character: 0, line: 0 },
+    //         end: { character: 0, line: 0 }
+    //       },
+    //       severity: 1
+    //     }
+    //   ]
+    // });
+
+    // responses.forEach(connection.sendDiagnostics);
+  });
+}
+
+function clearAndPublishDiagnostics<T>(
+  diagnostics: PublishDiagnosticsParams[]
+) {
+  diagnosticsCache.forEach((_, uri) => {
+    connection.sendDiagnostics({
+      uri,
+      diagnostics: []
     });
+  });
 
-    responses.forEach(connection.sendDiagnostics);
+  diagnosticsCache.clear();
+
+  diagnostics.forEach(d => {
+    if (diagnosticsCache.has(d.uri)) {
+      diagnosticsCache.get(d.uri)!.push(...d.diagnostics);
+    } else {
+      diagnosticsCache.set(d.uri, d.diagnostics);
+    }
+  });
+
+  diagnosticsCache.forEach((diagnostics, uri) => {
+    connection.sendDiagnostics({ uri, diagnostics });
   });
 }

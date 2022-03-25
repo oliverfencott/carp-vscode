@@ -1,17 +1,38 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
-import { Definition, Hover } from 'vscode-languageserver-protocol';
+import {
+  CompletionItem,
+  Definition,
+  Hover,
+  PublishDiagnosticsParams,
+  SymbolInformation
+} from 'vscode-languageserver-protocol';
 import { IS_DEV } from './env';
-import { makeRandomString, safeParse, stripColor } from './util';
+import { lines, makeRandomString, safeParse, stripColor } from './util';
 
 const PROMPT = '--' + makeRandomString() + '--';
 
+export type Response<T> = {
+  diagnostics: PublishDiagnosticsParams[];
+  response: T | null;
+};
+
+type AsyncResponse<T> = Promise<Response<T>>;
+
+type HoverParams = {
+  filePath: string;
+  line: number;
+  column: number;
+};
+
+type DefinitionParams = HoverParams;
+
 export class Carp {
-  private _resolve: Promise<unknown>;
+  private _resolve: Promise<string>;
   private _carp: ChildProcessWithoutNullStreams;
 
   constructor() {
     if (IS_DEV) {
-      this._carp = spawn(`stack`, ['run', '--', '--prompt', PROMPT, '-l'], {
+      this._carp = spawn(`stack`, ['run', '--', '--prompt', PROMPT, '-a'], {
         cwd: '../carp'
       });
     } else {
@@ -33,7 +54,7 @@ export class Carp {
         if (data.endsWith(PROMPT)) {
           this._carp.stdout.off('data', onData);
 
-          res(void 0);
+          res('');
         }
       };
 
@@ -42,18 +63,10 @@ export class Carp {
   }
 
   private _execute(command: string) {
-    /**
-     * TODO: The logic here is incorrect.
-     * In order to function properly, "this._resolve"
-     * should be mutated immediately, something like:
-     * this._resolve = this._resolve.then(() => {
-     *   callbackThatReturnsAPromise()
-     * })
-     */
-    return this._resolve.then(() => {
+    this._resolve = this._resolve.then(() => {
       let text = '';
 
-      const prom = new Promise(res => {
+      return new Promise(res => {
         const onData = (data: Buffer | string) => {
           data = stripColor(data.toString());
 
@@ -61,7 +74,7 @@ export class Carp {
             text += data.slice(0, -PROMPT.length);
             this._carp.stdout.off('data', onData);
 
-            res(void 0);
+            res(text);
           } else {
             text += data;
           }
@@ -70,87 +83,90 @@ export class Carp {
         this._carp.stdout.on('data', onData);
         this._carp.stdin.write(command + '\n');
       });
-
-      this._resolve = prom;
-
-      return this._resolve.then(() => text);
     });
+
+    return this._resolve;
   }
 
-  hover({
+  async hover({ filePath, line, column }: HoverParams): AsyncResponse<Hover> {
+    const res = await this._execute(
+      `(Analysis.text-document/hover "${filePath}" ${line} ${column})`
+    );
+
+    return Carp._parse(res);
+  }
+
+  async validate({
+    filePath
+  }: {
+    filePath: string;
+  }): AsyncResponse<PublishDiagnosticsParams[]> {
+    const res = await this._execute(`(Analysis.validate "${filePath}")`);
+
+    console.log(res);
+
+    return Carp._parse(res);
+  }
+
+  async documentSymbol({
+    filePath
+  }: {
+    filePath: string;
+  }): AsyncResponse<SymbolInformation[]> {
+    const res = await this._execute(
+      `(Analysis.text-document/document-symbol "${filePath}")`
+    );
+
+    return Carp._parse(res);
+  }
+
+  async definition({
     filePath,
     line,
     column
+  }: DefinitionParams): AsyncResponse<Definition> {
+    const res = await this._execute(
+      `(Analysis.text-document/definition "${filePath}" ${line} ${column})`
+    );
+
+    return Carp._parse(res);
+  }
+
+  async textDocumentCompletion({
+    filePath
   }: {
     filePath: string;
-    line: number;
-    column: number;
-  }) {
-    const splitter = makeRandomString();
-    return this._execute(
-      [
-        `(load "${filePath}")`,
-        `(macro-log "${splitter}")`,
-        `(Analysis.text-document/hover "${filePath}" ${line} ${column})`
-      ].join('')
-    ).then(res => {
-      [, res] = res.split(splitter);
-      const response = safeParse<Hover>(res);
+  }): AsyncResponse<CompletionItem[]> {
+    const res = await this._execute(
+      `(Analysis.text-document/completion "${filePath}")`
+    );
 
-      return response;
-    });
-  }
-
-  check({ filePath }: { filePath: string }) {
-    return this._execute([`(load "${filePath}")`].join('')).then(res => {
-      console.log(res);
-
-      return res;
-    });
-  }
-
-  textDocumentDocumentSymbol({ filePath }: { filePath: string }) {
-    const splitter = makeRandomString();
-    return this._execute(
-      [
-        `(load "${filePath}")`,
-        `(macro-log "${splitter}")`,
-        `(Analysis.text-document/document-symbol "${filePath}")`
-      ].join('')
-    ).then(res => {
-      [, res] = res.split(splitter);
-
-      return res;
-    });
-  }
-
-  textDocumentDefinition({
-    filePath,
-    line,
-    column
-  }: {
-    filePath: string;
-    line: number;
-    column: number;
-  }) {
-    const splitter = makeRandomString();
-    return this._execute(
-      [
-        `(load "${filePath}")`,
-        `(macro-log "${splitter}")`,
-        `(Analysis.text-document/definition "${filePath}" ${line} ${column})`
-      ].join('')
-    ).then(res => {
-      console.log('Response from textDocumentDefinition', res);
-      [, res] = res.split(splitter);
-      const response = safeParse<Definition>(res);
-
-      return response;
-    });
+    return Carp._parse(res);
   }
 
   quit() {
     return this._execute('(quit)');
+  }
+
+  private static _parse<T>(text: string): Response<T> {
+    const parsed = lines.parse(text).map(safeParse).filter(Boolean).reverse();
+    const [head, ...diagnostics] = parsed;
+
+    if (
+      head &&
+      // @ts-ignore
+      Array.isArray(head.diagnostics)
+    ) {
+      return {
+        response: null,
+        diagnostics: parsed as PublishDiagnosticsParams[]
+      };
+    }
+
+    return {
+      response: head as T,
+      diagnostics: diagnostics as PublishDiagnosticsParams[]
+    };
   }
 }
 
