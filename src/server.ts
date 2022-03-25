@@ -12,20 +12,12 @@ import {
 } from 'vscode-languageserver/node';
 import Carp from './carp';
 
-function stripFileProtocol(path: string) {
-  return path.replace('file://', '');
-}
-
-function addFileProtocol(path: string) {
-  return 'file://' + path;
-}
-
 const caches = {
-  completions: new Map<string, CompletionItem[]>()
+  completions: new Map<string, CompletionItem[]>(),
+  diagnostics: new Map<string, Diagnostic[]>()
 };
 
 const carp = new Carp();
-const diagnosticsCache = new Map<string, Diagnostic[]>();
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -56,6 +48,7 @@ connection.onInitialize(_params => {
 
 connection.onExit(() => carp.quit());
 
+// TODO: Pass a symbol path to the completion function, to allow for nested module autocompletion (for faster results)
 connection.onCompletion(async params => {
   // const { uri } = params.textDocument;
 
@@ -132,7 +125,7 @@ documents.onDidSave(params => {
 
 connection.onHover(async (document, _token, _progressReporter) => {
   const { response, diagnostics } = await carp.hover({
-    filePath: stripFileProtocol(document.textDocument.uri),
+    uri: document.textDocument.uri,
     line: document.position.line + 1,
     column: document.position.character + 1
   });
@@ -143,11 +136,8 @@ connection.onHover(async (document, _token, _progressReporter) => {
 });
 
 connection.onDocumentSymbol(async params => {
-  const uri = stripFileProtocol(params.textDocument.uri);
-
-  const { response, diagnostics } = await carp.documentSymbol({
-    filePath: uri
-  });
+  const { uri } = params.textDocument;
+  const { response, diagnostics } = await carp.documentSymbol({ uri });
 
   clearAndPublishDiagnostics(diagnostics);
 
@@ -156,7 +146,7 @@ connection.onDocumentSymbol(async params => {
 
 connection.onDefinition(async params => {
   const { response, diagnostics } = await carp.definition({
-    filePath: stripFileProtocol(params.textDocument.uri),
+    uri: params.textDocument.uri,
     line: params.position.line + 1,
     column: params.position.character + 1
   });
@@ -174,70 +164,32 @@ documents.listen(connection);
 connection.listen();
 
 function checkFile(uri: string) {
-  diagnosticsCache.forEach((_, uri) => {
-    connection.sendDiagnostics({
-      uri,
-      diagnostics: []
-    });
-  });
-
-  diagnosticsCache.clear();
-
-  carp.validate({ filePath: stripFileProtocol(uri) }).then(res => {
-    console.log('on did save request response:');
-    console.log(res);
-    // const responses = res
-    //   .split('\n')
-    //   .map(x => safeParse<PublishDiagnosticsParams>(x))
-    //   .filter(Boolean) as PublishDiagnosticsParams[];
-
-    // if (!responses.length) {
-    //   return [];
-    // }
-
-    // responses.forEach(response => {
-    //   diagnosticsCache.add(response.uri);
-    // });
-
-    // connection.sendDiagnostics({
-    //   uri: '',
-    //   diagnostics: [
-    //     {
-    //       message: 'msg',
-    //       range: {
-    //         start: { character: 0, line: 0 },
-    //         end: { character: 0, line: 0 }
-    //       },
-    //       severity: 1
-    //     }
-    //   ]
-    // });
-
-    // responses.forEach(connection.sendDiagnostics);
+  carp.validate({ uri }).then(res => {
+    clearAndPublishDiagnostics(res.diagnostics);
   });
 }
 
 function clearAndPublishDiagnostics<T>(
   diagnostics: PublishDiagnosticsParams[]
 ) {
-  diagnosticsCache.forEach((_, uri) => {
+  caches.diagnostics.forEach((_, uri) => {
     connection.sendDiagnostics({
       uri,
       diagnostics: []
     });
   });
 
-  diagnosticsCache.clear();
+  caches.diagnostics.clear();
 
   diagnostics.forEach(d => {
-    if (diagnosticsCache.has(d.uri)) {
-      diagnosticsCache.get(d.uri)!.push(...d.diagnostics);
+    if (caches.diagnostics.has(d.uri)) {
+      caches.diagnostics.get(d.uri)!.push(...d.diagnostics);
     } else {
-      diagnosticsCache.set(d.uri, d.diagnostics);
+      caches.diagnostics.set(d.uri, d.diagnostics);
     }
   });
 
-  diagnosticsCache.forEach((diagnostics, uri) => {
+  caches.diagnostics.forEach((diagnostics, uri) => {
     connection.sendDiagnostics({ uri, diagnostics });
   });
 }

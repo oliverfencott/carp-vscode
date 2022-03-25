@@ -19,7 +19,7 @@ export type Response<T> = {
 type AsyncResponse<T> = Promise<Response<T>>;
 
 type HoverParams = {
-  filePath: string;
+  uri: string;
   line: number;
   column: number;
 };
@@ -88,57 +88,49 @@ export class Carp {
     return this._resolve;
   }
 
-  async hover({ filePath, line, column }: HoverParams): AsyncResponse<Hover> {
+  async hover({ uri, line, column }: HoverParams): AsyncResponse<Hover> {
     const res = await this._execute(
-      `(Analysis.text-document/hover "${filePath}" ${line} ${column})`
+      `(Analysis.text-document/hover "${uri}" ${line} ${column})`
     );
 
     return Carp._parse(res);
   }
 
   async validate({
-    filePath
-  }: {
-    filePath: string;
-  }): AsyncResponse<PublishDiagnosticsParams[]> {
-    const res = await this._execute(`(Analysis.validate "${filePath}")`);
-
-    console.log(res);
+    uri
+  }: Pick<DefinitionParams, 'uri'>): AsyncResponse<PublishDiagnosticsParams[]> {
+    const res = await this._execute(`(Analysis.validate "${uri}")`);
 
     return Carp._parse(res);
   }
 
   async documentSymbol({
-    filePath
-  }: {
-    filePath: string;
-  }): AsyncResponse<SymbolInformation[]> {
+    uri
+  }: Pick<DefinitionParams, 'uri'>): AsyncResponse<SymbolInformation[]> {
     const res = await this._execute(
-      `(Analysis.text-document/document-symbol "${filePath}")`
+      `(Analysis.text-document/document-symbol "${uri}")`
     );
 
     return Carp._parse(res);
   }
 
   async definition({
-    filePath,
+    uri,
     line,
     column
   }: DefinitionParams): AsyncResponse<Definition> {
     const res = await this._execute(
-      `(Analysis.text-document/definition "${filePath}" ${line} ${column})`
+      `(Analysis.text-document/definition "${uri}" ${line} ${column})`
     );
 
     return Carp._parse(res);
   }
 
   async textDocumentCompletion({
-    filePath
-  }: {
-    filePath: string;
-  }): AsyncResponse<CompletionItem[]> {
+    uri
+  }: Pick<DefinitionParams, 'uri'>): AsyncResponse<CompletionItem[]> {
     const res = await this._execute(
-      `(Analysis.text-document/completion "${filePath}")`
+      `(Analysis.text-document/completion "${uri}")`
     );
 
     return Carp._parse(res);

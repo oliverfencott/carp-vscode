@@ -5,7 +5,7 @@ async function main() {
 
   await carp
     .documentSymbol({
-      filePath: '/Users/oliverfencott/Desktop/projects/carp-vscode/test.carp'
+      uri: '/Users/oliverfencott/Desktop/projects/carp-vscode/test.carp'
     })
     .then(res => {
       console.log('textDocumentDocumentSymbol');
