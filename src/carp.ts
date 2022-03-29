@@ -63,6 +63,7 @@ export class Carp {
   }
 
   private _execute(command: string) {
+    console.log('[Request]', command);
     this._resolve = this._resolve.then(() => {
       let text = '';
 
@@ -74,6 +75,7 @@ export class Carp {
             text += data.slice(0, -PROMPT.length);
             this._carp.stdout.off('data', onData);
 
+            console.log('[Response]', text);
             res(text);
           } else {
             text += data;
@@ -98,7 +100,9 @@ export class Carp {
 
   async validate({
     uri
-  }: Pick<DefinitionParams, 'uri'>): AsyncResponse<PublishDiagnosticsParams[]> {
+  }: {
+    uri: string;
+  }): AsyncResponse<PublishDiagnosticsParams[]> {
     const res = await this._execute(`(Analysis.validate "${uri}")`);
 
     return Carp._parse(res);
@@ -106,7 +110,9 @@ export class Carp {
 
   async documentSymbol({
     uri
-  }: Pick<DefinitionParams, 'uri'>): AsyncResponse<SymbolInformation[]> {
+  }: {
+    uri: string;
+  }): AsyncResponse<SymbolInformation[]> {
     const res = await this._execute(
       `(Analysis.text-document/document-symbol "${uri}")`
     );
@@ -128,7 +134,9 @@ export class Carp {
 
   async textDocumentCompletion({
     uri
-  }: Pick<DefinitionParams, 'uri'>): AsyncResponse<CompletionItem[]> {
+  }: {
+    uri: string;
+  }): AsyncResponse<CompletionItem[]> {
     const res = await this._execute(
       `(Analysis.text-document/completion "${uri}")`
     );

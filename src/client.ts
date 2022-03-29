@@ -11,37 +11,10 @@ import {
 
 let client: LanguageClient;
 
-// class HoverProvider implements vscode.HoverProvider {
-//   provideHover(
-//     document: vscode.TextDocument,
-//     position: vscode.Position,
-//     token: vscode.CancellationToken
-//   ): vscode.ProviderResult<vscode.Hover> {
-//     return {
-//       contents: [
-//         {
-//           value: [
-//             `Hello, from CodeLens!`,
-//             `__Line__: ${position.line}`,
-//             `__Char__: ${position.character}`
-//           ].join('\n'),
-//           language: 'carp',
-//           isTrusted: true
-//         }
-//       ]
-//     };
-//   }
-// }
-
 export function activate(context: ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "carp-vscode" is now active!');
-
-  // const hoverProvider = vscode.languages.registerHoverProvider(
-  //   'carp',
-  //   new CarpHoverProvider()
-  // );
 
   // The server is implemented in node
   let serverModule = context.asAbsolutePath(path.join('dist', 'server.js'));
